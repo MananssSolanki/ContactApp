@@ -19,4 +19,7 @@ interface ContactDao {
     @Delete()
     suspend fun delete(contact : Contact)
 
+    @Query("SELECT COUNT(*) FROM contact")
+    suspend fun getCount(): Int
+
 }
