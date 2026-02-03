@@ -30,52 +30,6 @@ class PhoneFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
-        binding.rvPhoneContacts.layoutManager = LinearLayoutManager(requireContext())
-        binding.rvPhoneContacts.adapter = adapter
-        
-        loadContacts()
-    }
 
-    override fun onResume() {
-        super.onResume()
-        loadContacts()
-    }
-
-    private fun loadContacts() {
-        if (ContextCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.READ_CONTACTS
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            binding.tvPermissionDenied.visibility = View.GONE
-            binding.progressBar.visibility = View.VISIBLE
-            
-            val contacts = ArrayList<PhoneContact>()
-            val cursor = requireContext().contentResolver.query(
-                ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-                null,
-                null,
-                null,
-                ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " ASC"
-            )
-            
-            cursor?.use {
-                val nameIndex = it.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME)
-                val numberIndex = it.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)
-                
-                while (it.moveToNext()) {
-                    val name = if (nameIndex != -1) it.getString(nameIndex) else "Unknown"
-                    val number = if (numberIndex != -1) it.getString(numberIndex) else "Unknown"
-                    contacts.add(PhoneContact(name, number))
-                }
-            }
-            
-            adapter.submitList(contacts)
-            binding.progressBar.visibility = View.GONE
-        } else {
-            binding.tvPermissionDenied.visibility = View.VISIBLE
-            binding.progressBar.visibility = View.GONE
-            // Optional: You could request permission here, but MainActivity is handling it primarily.
-        }
     }
 }

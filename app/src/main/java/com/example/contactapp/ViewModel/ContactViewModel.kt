@@ -3,7 +3,9 @@ package com.example.contactapp.ViewModel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.example.contactapp.Model.PhoneContact
 import com.example.contactapp.Repository.ContactRepository
 import com.example.contactapp.RoomDatabase.Contact
 import com.example.contactapp.RoomDatabase.ContactDatabase
@@ -13,9 +15,15 @@ class ContactViewModel(app : Application) : AndroidViewModel(app) {
     private val repository : ContactRepository
     val contact : LiveData<List<Contact>>
 
+    private val _phoneContacts = MutableLiveData<List<PhoneContact>>()
+    val phoneContacts : LiveData<List<PhoneContact>> = _phoneContacts
+
+    private val _loading = MutableLiveData<Boolean>()
+    val loading : LiveData<Boolean> = _loading
+
     init {
         val dao = ContactDatabase.getDatabase(app).contactDao()
-        repository = ContactRepository(dao)
+        repository = ContactRepository(dao , app.applicationContext)
         contact = repository.contact
     }
 
@@ -28,6 +36,14 @@ class ContactViewModel(app : Application) : AndroidViewModel(app) {
     fun deleteContact(contact : Contact){
         viewModelScope.launch {
             repository.delete(contact)
+        }
+    }
+
+    fun loadPhoneContacts(){
+        viewModelScope.launch {
+            _loading.value = true
+            _phoneContacts.value = repository.getContacts()
+            _loading.value = false
         }
     }
 }
