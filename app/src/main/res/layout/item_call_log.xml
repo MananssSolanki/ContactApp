@@ -9,33 +9,19 @@
     android:clickable="true"
     android:focusable="true">
 
-    <!-- Contact Photo or Initial Avatar -->
-    <TextView
-        android:id="@+id/tvContactInitial"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:background="@color/teal_200"
-        android:gravity="center"
-        android:text="A"
-        android:textColor="@android:color/white"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
-
+    <!-- Call Type Icon -->
     <ImageView
-        android:id="@+id/ivContactPhoto"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:visibility="gone"
-        android:scaleType="centerCrop"
+        android:id="@+id/ivCallType"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:src="@android:drawable/sym_call_incoming"
+        android:contentDescription="Call Type"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        tools:src="@mipmap/ic_launcher"/>
+        tools:tint="@color/teal_700"/>
 
-    <!-- Contact Name -->
+    <!-- Contact Name or Phone Number -->
     <TextView
         android:id="@+id/tvContactName"
         android:layout_width="0dp"
@@ -48,26 +34,43 @@
         android:textColor="@android:color/black"
         android:maxLines="1"
         android:ellipsize="end"
-        app:layout_constraintStart_toEndOf="@id/tvContactInitial"
+        app:layout_constraintStart_toEndOf="@id/ivCallType"
         app:layout_constraintEnd_toStartOf="@id/btnCall"
         app:layout_constraintTop_toTopOf="parent"/>
 
-    <!-- Phone Number -->
+    <!-- Phone Number (if contact name exists) -->
     <TextView
         android:id="@+id/tvPhoneNumber"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginTop="4dp"
+        android:layout_marginTop="2dp"
         android:text="+1 234 567 8900"
-        android:textSize="14sp"
+        android:textSize="13sp"
         android:textColor="@android:color/darker_gray"
         android:maxLines="1"
         android:ellipsize="end"
-        app:layout_constraintStart_toEndOf="@id/tvContactInitial"
+        android:visibility="gone"
+        app:layout_constraintStart_toEndOf="@id/ivCallType"
         app:layout_constraintEnd_toStartOf="@id/btnCall"
-        app:layout_constraintTop_toBottomOf="@id/tvContactName"
+        app:layout_constraintTop_toBottomOf="@id/tvContactName"/>
+
+    <!-- Time and Duration -->
+    <TextView
+        android:id="@+id/tvTimeAndDuration"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="2dp"
+        android:text="10:30 AM • 2:45"
+        android:textSize="12sp"
+        android:textColor="@android:color/darker_gray"
+        android:maxLines="1"
+        app:layout_constraintStart_toEndOf="@id/ivCallType"
+        app:layout_constraintEnd_toStartOf="@id/btnCall"
+        app:layout_constraintTop_toBottomOf="@id/tvPhoneNumber"
         app:layout_constraintBottom_toBottomOf="parent"/>
 
     <!-- Call Button -->

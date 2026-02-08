@@ -13,16 +13,14 @@ import com.example.contactapp.databinding.ActivityMainBinding
 import com.google.android.material.tabs.TabLayoutMediator
 
 class MainActivity : AppCompatActivity() {
-
     private lateinit var binding: ActivityMainBinding
-
     private val requestPermissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
-            if (isGranted) {
-                // Permission granted, fragments will handle loading
-                Toast.makeText(this, "Permission Granted", Toast.LENGTH_SHORT).show()
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            val allGranted = permissions.values.all { it }
+            if (allGranted) {
+                Toast.makeText(this, "All Permissions Granted", Toast.LENGTH_SHORT).show()
             } else {
-                Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Some permissions were denied", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -50,12 +48,31 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkPermission() {
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.READ_CONTACTS
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            requestPermissionLauncher.launch(Manifest.permission.READ_CONTACTS)
+        val permissionsToRequest = mutableListOf<String>()
+        
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS) 
+            != PackageManager.PERMISSION_GRANTED) {
+            permissionsToRequest.add(Manifest.permission.READ_CONTACTS)
+        }
+        
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_CONTACTS) 
+            != PackageManager.PERMISSION_GRANTED) {
+            permissionsToRequest.add(Manifest.permission.WRITE_CONTACTS)
+        }
+        
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) 
+            != PackageManager.PERMISSION_GRANTED) {
+            permissionsToRequest.add(Manifest.permission.CALL_PHONE)
+        }
+        
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CALL_LOG) 
+            != PackageManager.PERMISSION_GRANTED) {
+            permissionsToRequest.add(Manifest.permission.READ_CALL_LOG)
+        }
+        
+        if (permissionsToRequest.isNotEmpty()) {
+            requestPermissionLauncher.launch(permissionsToRequest.toTypedArray())
         }
     }
+
 }
