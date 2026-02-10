@@ -1,4 +1,4 @@
-package com.example.contactapp.data.model
+package com.example.contactapp.Model
 
 import android.net.Uri
 import android.os.Parcelable

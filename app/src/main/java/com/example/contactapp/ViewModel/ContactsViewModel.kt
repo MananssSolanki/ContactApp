@@ -1,18 +1,18 @@
-package com.example.contactapp.ui.contacts
+package com.example.contactapp.ViewModel
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.contactapp.data.model.Contact
-import com.example.contactapp.data.repository.ContactsRepository
+import com.example.contactapp.Model.Contact
+import com.example.contactapp.Repository.ContactsRepository
 import kotlinx.coroutines.launch
 
 class ContactsViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = ContactsRepository(application)
-    
+
     private val _contacts = MutableLiveData<List<Contact>>()
     val contacts: LiveData<List<Contact>> = _contacts
 
@@ -27,6 +27,6 @@ class ContactsViewModel(application: Application) : AndroidViewModel(application
             _isLoading.value = false
         }
     }
-    
+
     fun getAddContactIntent() = repository.addContactIntent()
 }

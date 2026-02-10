@@ -12,8 +12,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.contactapp.MainActivity
-import com.example.contactapp.RoomDatabase.Contact
-import com.example.contactapp.RoomDatabase.ContactDatabase
 import com.example.contactapp.databinding.ActivitySplashScreenBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -64,22 +62,6 @@ class SplashScreenActivity : AppCompatActivity() {
     }
 
     private suspend fun initializeContactsIfNeeded() {
-        val db = ContactDatabase.getDatabase(applicationContext)
-        val dao = db.contactDao()
 
-        try {
-            val count = dao.getCount()
-            if (count == 0) {
-                dao.insert(
-                    Contact(
-                        name = "Emergency",
-                        number = "112"
-                    )
-                )
-                Log.d("SplashScreen", "Default contact inserted")
-            }
-        } catch (e: Exception) {
-            Log.e("SplashScreen", "Contact initialization failed", e)
-        }
     }
 }

@@ -3,7 +3,7 @@ package com.example.contactapp.Adapter
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
-import com.example.contactapp.ui.contacts.ContactsFragment
+import com.example.contactapp.Fragments.ContactsFragment
 import com.example.contactapp.Fragments.PhoneFragment
 import com.example.contactapp.Fragments.RecentFragment
 

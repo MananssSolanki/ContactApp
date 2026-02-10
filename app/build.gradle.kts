@@ -55,7 +55,8 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     implementation("androidx.room:room-runtime:2.6.1")
     kapt("androidx.room:room-compiler:2.6.1")
-
+    implementation("com.intuit.ssp:ssp-android:1.1.1")
+    implementation("com.intuit.sdp:sdp-android:1.1.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.9")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.6")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")

@@ -1,4 +1,4 @@
-package com.example.contactapp.ui.contacts
+package com.example.contactapp.Adapter
 
 import android.graphics.Color
 import android.graphics.PorterDuff
@@ -9,8 +9,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.example.contactapp.R
-import com.example.contactapp.data.model.Contact
+import com.example.contactapp.Model.Contact
 import com.example.contactapp.databinding.ItemContactBinding
 import java.util.Random
 
@@ -32,7 +31,7 @@ class ContactsAdapter(
         fun bind(contact: Contact) {
             binding.tvContactName.text = contact.name
             binding.tvPhoneNumber.text = contact.phoneNumber
-            
+
             if (contact.photoUri != null) {
                 binding.ivContactPhoto.visibility = View.VISIBLE
                 binding.tvContactInitial.visibility = View.GONE
@@ -45,7 +44,7 @@ class ContactsAdapter(
                 binding.tvContactInitial.visibility = View.VISIBLE
                 val initial = contact.name.firstOrNull()?.toString()?.uppercase() ?: "?"
                 binding.tvContactInitial.text = initial
-                
+
                 // Random background color for initial (or could be deterministic based on name)
                 val random = Random(contact.id.hashCode().toLong())
                 val color = Color.argb(255, random.nextInt(256), random.nextInt(256), random.nextInt(256))
@@ -54,10 +53,6 @@ class ContactsAdapter(
 
             binding.root.setOnClickListener {
                 onContactClick(contact)
-            }
-            
-            binding.btnCall.setOnClickListener {
-                onCallClick(contact)
             }
         }
     }

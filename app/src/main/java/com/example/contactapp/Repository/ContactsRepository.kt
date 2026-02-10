@@ -1,4 +1,4 @@
-package com.example.contactapp.data.repository
+package com.example.contactapp.Repository
 
 import android.content.ContentResolver
 import android.content.Context
@@ -6,7 +6,7 @@ import android.content.Intent
 import android.database.Cursor
 import android.net.Uri
 import android.provider.ContactsContract
-import com.example.contactapp.data.model.Contact
+import com.example.contactapp.Model.Contact
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -15,7 +15,7 @@ class ContactsRepository(private val context: Context) {
     suspend fun getContacts(): List<Contact> = withContext(Dispatchers.IO) {
         val contactsList = mutableListOf<Contact>()
         val contentResolver: ContentResolver = context.contentResolver
-        
+
         val projection = arrayOf(
             ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
             ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
@@ -43,9 +43,9 @@ class ContactsRepository(private val context: Context) {
 
             while (it.moveToNext()) {
                 val id = it.getString(idIndex)
-                
-                // Avoid duplicates if a contact has multiple numbers (just taking the first one for list simplicity, 
-                // or we could aggregate them. Requirement said "multiple phone numbers" but list usually shows one. 
+
+                // Avoid duplicates if a contact has multiple numbers (just taking the first one for list simplicity,
+                // or we could aggregate them. Requirement said "multiple phone numbers" but list usually shows one.
                 // I will add logic to handle duplicates if needed, but for a list view, unique contacts are better.)
                 if (uniqueContactIds.contains(id)) continue
 
@@ -53,7 +53,7 @@ class ContactsRepository(private val context: Context) {
                 val number = it.getString(numberIndex) ?: ""
                 val photoUriString = it.getString(photoIndex)
                 val photoUri = if (photoUriString != null) Uri.parse(photoUriString) else null
-                
+
                 uniqueContactIds.add(id)
                 contactsList.add(Contact(id, name, number, photoUri))
             }
