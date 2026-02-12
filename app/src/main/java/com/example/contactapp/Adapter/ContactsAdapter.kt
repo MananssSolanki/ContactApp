@@ -14,9 +14,30 @@ import com.example.contactapp.databinding.ItemContactBinding
 import java.util.Random
 
 class ContactsAdapter(
-    private val onContactClick: (Contact) -> Unit,
-    private val onCallClick: (Contact) -> Unit
 ) : ListAdapter<Contact, ContactsAdapter.ContactViewHolder>(ContactDiffCallback()) {
+
+    private var expandedPosition = -1
+    private var onCallItemClickListener : ((Contact) -> Unit) ?= null
+    private var onSmsItemClickListener : ((Contact) -> Unit) ?= null
+    private var onVideoCallItemClickListener : ((Contact) -> Unit) ?= null
+    private var onInformationItemClickListener : ((Contact) -> Unit) ?= null
+
+    fun setOnCallClickListener(onCallItemClickListener : (Contact) -> Unit){
+        this.onCallItemClickListener = onCallItemClickListener
+    }
+
+    fun setOnInformationClickListener(onInformationItemClickListener : (Contact) -> Unit){
+        this.onInformationItemClickListener = onInformationItemClickListener
+    }
+
+    fun setOnSmsClickListener(onSmsItemClickListener : (Contact) -> Unit){
+        this.onSmsItemClickListener = onSmsItemClickListener
+    }
+
+    fun setOnVideoCallClickListener(onVideoCallItemClickListener : (Contact) -> Unit){
+        this.onVideoCallItemClickListener = onVideoCallItemClickListener
+    }
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ContactViewHolder {
         val binding = ItemContactBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -31,6 +52,9 @@ class ContactsAdapter(
         fun bind(contact: Contact) {
             binding.tvContactName.text = contact.name
             binding.tvPhoneNumber.text = contact.phoneNumber
+
+            val isExpanded = position == expandedPosition
+            binding.subLy.visibility = if (isExpanded) View.VISIBLE else View.GONE
 
             if (contact.photoUri != null) {
                 binding.ivContactPhoto.visibility = View.VISIBLE
@@ -51,8 +75,31 @@ class ContactsAdapter(
                 binding.tvContactInitial.background.setColorFilter(color, PorterDuff.Mode.SRC_IN)
             }
 
+            binding.phoneImg.setOnClickListener {
+                onCallItemClickListener!!.invoke(contact)
+            }
+
+            binding.smsImg.setOnClickListener {
+                onSmsItemClickListener!!.invoke(contact)
+            }
+
+            binding.videoCallImg.setOnClickListener {
+                onVideoCallItemClickListener!!.invoke(contact)
+            }
+
+            binding.informationImg.setOnClickListener {
+                onInformationItemClickListener!!.invoke(contact)
+            }
+
             binding.root.setOnClickListener {
-                onContactClick(contact)
+                val previousPosition = expandedPosition
+                expandedPosition = if (isExpanded) -1 else position
+
+                // refresh old and new item
+                if (previousPosition != -1) notifyItemChanged(previousPosition)
+                notifyItemChanged(position)
+                binding.subLy.visibility = View.VISIBLE
+//                onContactClick(contact)
             }
         }
     }

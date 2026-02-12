@@ -6,6 +6,8 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.telecom.TelecomManager
+import android.telecom.VideoProfile
+import android.telephony.SmsManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,10 +20,10 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.contactapp.databinding.FragmentContactBinding
 import com.example.contactapp.Adapter.ContactsAdapter
 import com.example.contactapp.ViewModel.ContactsViewModel
-import com.example.contactapp.utils.SwipeCallback
+import com.example.contactapp.databinding.FragmentContactBinding
+import com.example.contactapp.Utils.SwipeCallback
 
 class ContactsFragment : Fragment() {
 
@@ -31,15 +33,16 @@ class ContactsFragment : Fragment() {
     private val viewModel: ContactsViewModel by viewModels()
     private lateinit var contactsAdapter: ContactsAdapter
 
-    // Multi-permission launcher
-    private val permissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {}
-
-    // Call permission launcher
-    private val callPermissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-            if (!granted) {
-                Toast.makeText(context, "Call permission denied", Toast.LENGTH_SHORT).show()
+    private val requestPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            val readContactsGranted = permissions[Manifest.permission.READ_CONTACTS] ?: false
+            if (readContactsGranted) {
+                viewModel.loadContacts()
+            } else {
+                Toast.makeText(context, "Read contacts permission is required", Toast.LENGTH_SHORT).show()
+                binding.tvPermissionDenied.visibility = View.VISIBLE
+                binding.tvEmptyState.text = "Permission denied"
+                binding.tvEmptyState.visibility = View.VISIBLE
             }
         }
 
@@ -52,86 +55,40 @@ class ContactsFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
         setupRecyclerView()
         setupObservers()
         setupSearchView()
         checkPermissions()
 
         binding.btnAddContact.setOnClickListener {
-            try {
-                startActivity(viewModel.getAddContactIntent())
-            } catch (e: Exception) {
-                Toast.makeText(context, "Cannot open contacts app", Toast.LENGTH_SHORT).show()
-            }
+           try {
+               startActivity(viewModel.getAddContactIntent())
+           } catch (e: Exception) {
+               Toast.makeText(context, "Cannot open contacts app", Toast.LENGTH_SHORT).show()
+           }
         }
     }
 
-    private fun setupRecyclerView() {
-        contactsAdapter = ContactsAdapter(
-            onContactClick = {},
-            onCallClick = { makeCall(it.phoneNumber) }
-        )
-
-        binding.rvPhoneContacts.apply {
-            layoutManager = LinearLayoutManager(context)
-            adapter = contactsAdapter
-        }
-
-        val swipeHandler = object : SwipeCallback(requireContext()) {
-            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                val position = viewHolder.adapterPosition
-                val contact = contactsAdapter.currentList[position]
-
-                when (direction) {
-                    ItemTouchHelper.LEFT -> makeCall(contact.phoneNumber)
-                    ItemTouchHelper.RIGHT -> sendSMS(contact.phoneNumber)
-                }
-
-                contactsAdapter.notifyItemChanged(position)
+    private val smsPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            if (!granted) {
+                Toast.makeText(context, "SMS permission denied", Toast.LENGTH_SHORT).show()
             }
         }
 
-        ItemTouchHelper(swipeHandler).attachToRecyclerView(binding.rvPhoneContacts)
-    }
 
-    private fun setupObservers() {
-        viewModel.contacts.observe(viewLifecycleOwner) {
-            contactsAdapter.submitList(it)
-            binding.tvEmptyState.visibility = if (it.isEmpty()) View.VISIBLE else View.GONE
+
+    fun openSmsApp(phoneNumber: String) {
+        val intent = Intent(Intent.ACTION_SENDTO).apply {
+            data = Uri.parse("smsto:$phoneNumber")
         }
-
-        viewModel.isLoading.observe(viewLifecycleOwner) {
-            binding.progressBar.visibility = if (it) View.VISIBLE else View.GONE
-        }
+        startActivity(intent)
     }
 
-    private fun setupSearchView() {
-        binding.searchView.setOnQueryTextListener(object :
-            SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?) = false
-            override fun onQueryTextChange(newText: String?) = true
-        })
-    }
 
-    private fun checkPermissions() {
-        val permissions = arrayOf(
-            Manifest.permission.READ_CONTACTS,
-            Manifest.permission.CALL_PHONE,
-            Manifest.permission.SEND_SMS
-        )
-
-        permissionLauncher.launch(permissions)
-
-        if (ContextCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.READ_CONTACTS
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            viewModel.loadContacts()
-        }
-    }
-
-    private fun makeCall(phone: String) {
+    fun makeVideoCall(phoneNumber: String) {
 
         if (ContextCompat.checkSelfPermission(
                 requireContext(),
@@ -145,19 +102,148 @@ class ContactsFragment : Fragment() {
         val telecomManager =
             requireContext().getSystemService(TelecomManager::class.java)
 
-        val uri = Uri.fromParts("tel", phone, null)
+        val uri = Uri.fromParts("tel", phoneNumber, null)
+
+        val extras = Bundle().apply {
+            putInt(
+                TelecomManager.EXTRA_START_CALL_WITH_VIDEO_STATE,
+                VideoProfile.STATE_BIDIRECTIONAL
+            )
+        }
 
         try {
-            telecomManager.placeCall(uri, Bundle())
+            telecomManager.placeCall(uri, extras)
         } catch (e: Exception) {
-            Toast.makeText(context, "Call failed", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                requireContext(),
+                "Video call not supported on this device",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
+
+
+    private fun setupRecyclerView() {
+        contactsAdapter = ContactsAdapter()
+
+        contactsAdapter.setOnCallClickListener { contact ->
+            makeCall(contact.phoneNumber)
+        }
+
+        contactsAdapter.setOnSmsClickListener {contact ->
+            openSmsApp(contact.phoneNumber)
+        }
+
+        contactsAdapter.setOnVideoCallClickListener { contact ->
+            makeVideoCall(contact.phoneNumber)
+        }
+
+        contactsAdapter.setOnInformationClickListener { contact ->
+
+        }
+
+
+        binding.rvPhoneContacts.apply {
+            layoutManager = LinearLayoutManager(context)
+            adapter = contactsAdapter
+        }
+
+        val swipeHandler = object : SwipeCallback(requireContext()) {
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val position = viewHolder.adapterPosition
+                val contact = contactsAdapter.currentList[position]
+
+                if (direction == ItemTouchHelper.LEFT) {
+                    // SMS
+                    sendSMS(contact.phoneNumber)
+                    contactsAdapter.notifyItemChanged(position) // Reset swipe
+                } else if (direction == ItemTouchHelper.RIGHT) {
+                    // Call
+                    makeCall(contact.phoneNumber)
+                    contactsAdapter.notifyItemChanged(position) // Reset swipe
+                }
+            }
+        }
+        val itemTouchHelper = ItemTouchHelper(swipeHandler)
+        itemTouchHelper.attachToRecyclerView(binding.rvPhoneContacts)
+    }
+
+    private fun setupSearchView() {
+        binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean = false
+            override fun onQueryTextChange(newText: String?): Boolean {
+                // Implementing basic search filter if needed, or pass to ViewModel
+                // For now, leaving it plain as ViewModel update for Search is separate constraint
+                return true
+            }
+        })
+    }
+
+    private fun setupObservers() {
+        viewModel.contacts.observe(viewLifecycleOwner) { contacts ->
+            contactsAdapter.submitList(contacts)
+            binding.tvEmptyState.visibility = if (contacts.isEmpty()) View.VISIBLE else View.GONE
+            binding.tvPermissionDenied.visibility = View.GONE
+        }
+
+        viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
+            binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+        }
+    }
+
+    private fun checkPermissions() {
+        when {
+            ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.READ_CONTACTS
+            ) == PackageManager.PERMISSION_GRANTED -> {
+                viewModel.loadContacts()
+            }
+            else -> {
+                requestPermissionLauncher.launch(
+                    arrayOf(
+                        Manifest.permission.READ_CONTACTS,
+                        Manifest.permission.CALL_PHONE,
+                        Manifest.permission.SEND_SMS
+                    )
+                )
+            }
+        }
+    }
+
+    private val callPermissionLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ) {}
+
+    private fun makeCall(phoneNumber : String){
+        if (ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.CALL_PHONE
+            ) != PackageManager.PERMISSION_GRANTED
+        ){
+            callPermissionLauncher.launch(Manifest.permission.CALL_PHONE)
+        }
+
+        val telecomManager = requireContext().getSystemService(TelecomManager::class.java)
+
+        val uri = Uri.fromParts("tel", phoneNumber ,null)
+
+        try{
+            telecomManager.placeCall(uri, Bundle())
+        }catch (e : Exception){
+            Toast.makeText(requireContext(), "Call failed : ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
 
     private fun sendSMS(number: String) {
-        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("sms:$number"))
+        val intent = Intent(Intent.ACTION_SENDTO).apply {
+            data = Uri.parse("smsto:$number")
+        }
         startActivity(intent)
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()

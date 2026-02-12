@@ -1,4 +1,4 @@
-package com.example.contactapp.utils
+package com.example.contactapp.Utils
 
 import android.content.Context
 import android.graphics.Canvas
