@@ -20,6 +20,7 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.contactapp.Activities.ContactInformationActivity
 import com.example.contactapp.Adapter.ContactsAdapter
 import com.example.contactapp.ViewModel.ContactsViewModel
 import com.example.contactapp.databinding.FragmentContactBinding
@@ -60,6 +61,7 @@ class ContactsFragment : Fragment() {
         setupRecyclerView()
         setupObservers()
         setupSearchView()
+        setupFastScroller()
         checkPermissions()
 
         binding.btnAddContact.setOnClickListener {
@@ -140,7 +142,10 @@ class ContactsFragment : Fragment() {
         }
 
         contactsAdapter.setOnInformationClickListener { contact ->
-
+            val intent = Intent(requireContext() , ContactInformationActivity::class.java).apply {
+                putExtra("CONTACT_DATA", contact)
+            }
+            startActivity(intent)
         }
 
 
@@ -178,6 +183,22 @@ class ContactsFragment : Fragment() {
                 return true
             }
         })
+    }
+
+    private fun setupFastScroller() {
+        binding.alphabetScrollbar.onSectionSelected = { section ->
+            val position = contactsAdapter.currentList.indexOfFirst { contact ->
+                val firstChar = contact.name.firstOrNull()?.uppercaseChar()
+                if (section == "#") {
+                    firstChar?.isDigit() == true
+                } else {
+                    firstChar.toString() == section
+                }
+            }
+            if (position != -1) {
+                (binding.rvPhoneContacts.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(position, 0)
+            }
+        }
     }
 
     private fun setupObservers() {

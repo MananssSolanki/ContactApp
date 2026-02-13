@@ -22,11 +22,7 @@ data class ContactEnhanced(
     val timesContacted: Int = 0,
     val notes: String? = null
 ) : Parcelable {
-    
-    /**
-     * Get the first character for section headers
-     * Returns "#" for special characters and non-English names
-     */
+
     fun getSectionCharacter(): String {
         if (name.isEmpty()) return "#"
         
@@ -36,28 +32,18 @@ data class ContactEnhanced(
             else -> "#" // Special characters and non-English
         }
     }
-    
-    /**
-     * Get all phone numbers (primary + additional)
-     */
+
     fun getAllPhoneNumbers(): List<String> {
         return listOf(phoneNumber) + additionalPhones
     }
-    
-    /**
-     * Get all emails (primary + additional)
-     */
+
     fun getAllEmails(): List<String> {
         val emails = mutableListOf<String>()
         email?.let { emails.add(it) }
         emails.addAll(additionalEmails)
         return emails
     }
-    
-    /**
-     * Calculate similarity score with another contact for duplicate detection
-     * Returns a score from 0.0 (completely different) to 1.0 (identical)
-     */
+
     fun calculateSimilarity(other: ContactEnhanced): Float {
         var score = 0f
         var factors = 0
@@ -90,17 +76,11 @@ data class ContactEnhanced(
         
         return if (factors > 0) score / factors else 0f
     }
-    
-    /**
-     * Normalize phone number for comparison (remove spaces, dashes, etc.)
-     */
+
     private fun normalizePhoneNumber(phone: String): String {
         return phone.replace(Regex("[^0-9+]"), "")
     }
-    
-    /**
-     * Calculate string similarity using Levenshtein distance
-     */
+
     private fun calculateStringSimilarity(s1: String, s2: String): Float {
         if (s1 == s2) return 1.0f
         if (s1.isEmpty() || s2.isEmpty()) return 0.0f
@@ -109,10 +89,7 @@ data class ContactEnhanced(
         val distance = levenshteinDistance(s1, s2)
         return 1.0f - (distance.toFloat() / maxLength)
     }
-    
-    /**
-     * Calculate Levenshtein distance between two strings
-     */
+
     private fun levenshteinDistance(s1: String, s2: String): Int {
         val dp = Array(s1.length + 1) { IntArray(s2.length + 1) }
         
@@ -134,9 +111,7 @@ data class ContactEnhanced(
     }
 }
 
-/**
- * Account types for contacts
- */
+
 @Parcelize
 enum class AccountType : Parcelable {
     PHONE,      // Device storage
@@ -146,17 +121,13 @@ enum class AccountType : Parcelable {
     OTHER       // Other account types
 }
 
-/**
- * Wrapper class to support both contact items and section headers
- */
+
 sealed class ContactListItemEnhanced {
     data class Header(val letter: String) : ContactListItemEnhanced()
     data class ContactItem(val contact: ContactEnhanced) : ContactListItemEnhanced()
 }
 
-/**
- * Duplicate contact group
- */
+
 data class DuplicateGroup(
     val contacts: List<ContactEnhanced>,
     val similarityScore: Float
@@ -165,17 +136,13 @@ data class DuplicateGroup(
         get() = contacts.maxByOrNull { it.timesContacted } ?: contacts.first()
 }
 
-/**
- * Search history item
- */
+
 data class SearchHistoryItem(
     val query: String,
     val timestamp: Long = System.currentTimeMillis()
 )
 
-/**
- * Smart suggestion based on user behavior
- */
+
 data class SmartSuggestion(
     val contact: ContactEnhanced,
     val reason: SuggestionReason,

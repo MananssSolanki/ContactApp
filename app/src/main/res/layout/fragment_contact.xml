@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:clipChildren="false">
 
     <!-- Toolbar with Search and Add Icon -->
     <com.google.android.material.appbar.MaterialToolbar
@@ -38,7 +39,7 @@
                 android:src="@android:drawable/ic_input_add"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="Add Contact"
-                android:tint="@android:color/white"/>
+                app:tint="@android:color/white"/>
 
         </LinearLayout>
 
@@ -57,21 +58,14 @@
         tools:listitem="@layout/item_contact"/>
 
     <!-- Alphabetic Fast Scrollbar -->
-    <LinearLayout
+    <com.example.contactapp.Views.FastScrollerView
         android:id="@+id/alphabetScrollbar"
-        android:layout_width="wrap_content"
+        android:layout_width="30dp"
         android:layout_height="0dp"
-        android:orientation="vertical"
-        android:paddingEnd="8dp"
-        android:paddingStart="8dp"
-        android:gravity="center"
+        android:layout_marginEnd="4dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toolbar"
-        app:layout_constraintBottom_toBottomOf="parent">
-        
-        <!-- Alphabet letters will be added programmatically -->
-        
-    </LinearLayout>
+        app:layout_constraintTop_toBottomOf="@id/toolbar" />
 
     <!-- Progress Bar -->
     <ProgressBar

@@ -2,6 +2,7 @@ package com.example.contactapp.Adapter
 
 import android.graphics.Color
 import android.graphics.PorterDuff
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,32 +10,33 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.example.contactapp.Model.Contact
+import com.example.contactapp.Model.ContactEnhanced
+import com.example.contactapp.R
 import com.example.contactapp.databinding.ItemContactBinding
 import java.util.Random
 
 class ContactsAdapter(
-) : ListAdapter<Contact, ContactsAdapter.ContactViewHolder>(ContactDiffCallback()) {
+) : ListAdapter<ContactEnhanced, ContactsAdapter.ContactViewHolder>(ContactDiffCallback()) {
 
     private var expandedPosition = -1
-    private var onCallItemClickListener : ((Contact) -> Unit) ?= null
-    private var onSmsItemClickListener : ((Contact) -> Unit) ?= null
-    private var onVideoCallItemClickListener : ((Contact) -> Unit) ?= null
-    private var onInformationItemClickListener : ((Contact) -> Unit) ?= null
+    private var onCallItemClickListener : ((ContactEnhanced) -> Unit) ?= null
+    private var onSmsItemClickListener : ((ContactEnhanced) -> Unit) ?= null
+    private var onVideoCallItemClickListener : ((ContactEnhanced) -> Unit) ?= null
+    private var onInformationItemClickListener : ((ContactEnhanced) -> Unit) ?= null
 
-    fun setOnCallClickListener(onCallItemClickListener : (Contact) -> Unit){
+    fun setOnCallClickListener(onCallItemClickListener : (ContactEnhanced) -> Unit){
         this.onCallItemClickListener = onCallItemClickListener
     }
 
-    fun setOnInformationClickListener(onInformationItemClickListener : (Contact) -> Unit){
+    fun setOnInformationClickListener(onInformationItemClickListener : (ContactEnhanced) -> Unit){
         this.onInformationItemClickListener = onInformationItemClickListener
     }
 
-    fun setOnSmsClickListener(onSmsItemClickListener : (Contact) -> Unit){
+    fun setOnSmsClickListener(onSmsItemClickListener : (ContactEnhanced) -> Unit){
         this.onSmsItemClickListener = onSmsItemClickListener
     }
 
-    fun setOnVideoCallClickListener(onVideoCallItemClickListener : (Contact) -> Unit){
+    fun setOnVideoCallClickListener(onVideoCallItemClickListener : (ContactEnhanced) -> Unit){
         this.onVideoCallItemClickListener = onVideoCallItemClickListener
     }
 
@@ -49,7 +51,7 @@ class ContactsAdapter(
     }
 
     inner class ContactViewHolder(private val binding: ItemContactBinding) : RecyclerView.ViewHolder(binding.root) {
-        fun bind(contact: Contact) {
+        fun bind(contact: ContactEnhanced) {
             binding.tvContactName.text = contact.name
             binding.tvPhoneNumber.text = contact.phoneNumber
 
@@ -60,8 +62,10 @@ class ContactsAdapter(
                 binding.ivContactPhoto.visibility = View.VISIBLE
                 binding.tvContactInitial.visibility = View.GONE
                 Glide.with(binding.root.context)
-                    .load(contact.photoUri)
+                    .load(Uri.parse(contact.photoUri))
                     .circleCrop()
+                    .placeholder(R.drawable.ic_launcher_foreground)
+                    .error(R.drawable.ic_launcher_foreground)
                     .into(binding.ivContactPhoto)
             } else {
                 binding.ivContactPhoto.visibility = View.GONE
@@ -70,25 +74,25 @@ class ContactsAdapter(
                 binding.tvContactInitial.text = initial
 
                 // Random background color for initial (or could be deterministic based on name)
-                val random = Random(contact.id.hashCode().toLong())
+                val random = Random(contact.contactId.hashCode().toLong())
                 val color = Color.argb(255, random.nextInt(256), random.nextInt(256), random.nextInt(256))
                 binding.tvContactInitial.background.setColorFilter(color, PorterDuff.Mode.SRC_IN)
             }
 
             binding.phoneImg.setOnClickListener {
-                onCallItemClickListener!!.invoke(contact)
+                onCallItemClickListener?.invoke(contact)
             }
 
             binding.smsImg.setOnClickListener {
-                onSmsItemClickListener!!.invoke(contact)
+                onSmsItemClickListener?.invoke(contact)
             }
 
             binding.videoCallImg.setOnClickListener {
-                onVideoCallItemClickListener!!.invoke(contact)
+                onVideoCallItemClickListener?.invoke(contact)
             }
 
             binding.informationImg.setOnClickListener {
-                onInformationItemClickListener!!.invoke(contact)
+                onInformationItemClickListener?.invoke(contact)
             }
 
             binding.root.setOnClickListener {
@@ -98,18 +102,17 @@ class ContactsAdapter(
                 // refresh old and new item
                 if (previousPosition != -1) notifyItemChanged(previousPosition)
                 notifyItemChanged(position)
-                binding.subLy.visibility = View.VISIBLE
-//                onContactClick(contact)
+                // binding.subLy.visibility = View.VISIBLE // Logic handled by notifyItemChanged re-binding
             }
         }
     }
 
-    class ContactDiffCallback : DiffUtil.ItemCallback<Contact>() {
-        override fun areItemsTheSame(oldItem: Contact, newItem: Contact): Boolean {
-            return oldItem.id == newItem.id
+    class ContactDiffCallback : DiffUtil.ItemCallback<ContactEnhanced>() {
+        override fun areItemsTheSame(oldItem: ContactEnhanced, newItem: ContactEnhanced): Boolean {
+            return oldItem.contactId == newItem.contactId
         }
 
-        override fun areContentsTheSame(oldItem: Contact, newItem: Contact): Boolean {
+        override fun areContentsTheSame(oldItem: ContactEnhanced, newItem: ContactEnhanced): Boolean {
             return oldItem == newItem
         }
     }
