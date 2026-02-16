@@ -87,6 +87,7 @@
                 android:background="?attr/selectableItemBackground">
 
                 <ImageView
+                    android:id="@+id/btn_phone"
                     android:layout_width="@dimen/_24sdp"
                     android:layout_height="@dimen/_24sdp"
                     android:src="@android:drawable/ic_menu_call"
@@ -171,6 +172,67 @@
                 </LinearLayout>
 
             </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_1sdp"
+                android:background="#E0E0E0"
+                android:layout_marginTop="@dimen/_16sdp"
+                android:layout_marginBottom="@dimen/_16sdp"/>
+
+            <!-- Call History Header -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Call History"
+                android:textSize="@dimen/_16ssp"
+                android:textColor="@android:color/black"
+                android:textStyle="bold"
+                android:layout_marginBottom="@dimen/_8sdp"/>
+
+            <!-- Permission Denied View -->
+            <LinearLayout
+                android:id="@+id/layout_permission_denied"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="@dimen/_16sdp"
+                android:visibility="gone">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Permission needed to show call history"
+                    android:gravity="center"/>
+                <Button
+                    android:id="@+id/btn_grant_permission"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Allow"
+                    android:layout_marginTop="@dimen/_8sdp"/>
+            </LinearLayout>
+
+            <!-- Short List -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_call_history_short"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                tools:itemCount="3"
+                tools:listitem="@layout/item_call_log"/>
+
+            <!-- View More -->
+            <TextView
+                android:id="@+id/btn_view_more_history"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="View More"
+                android:textColor="?attr/colorPrimary"
+                android:textSize="@dimen/_14ssp"
+                android:gravity="center"
+                android:padding="@dimen/_12sdp"
+                android:background="?attr/selectableItemBackground"
+                android:visibility="gone"/>
 
         </LinearLayout>
     </ScrollView>

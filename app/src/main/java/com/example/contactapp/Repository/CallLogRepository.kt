@@ -14,10 +14,17 @@ class CallLogRepository(private val context: Context) {
     /**
      * Fetch call logs from system and group by date sections
      */
-    suspend fun getCallLogs(): List<CallLogListItem> = withContext(Dispatchers.IO) {
+    /**
+     * Fetch call logs from system and group by date sections
+     * @param phoneNumber Optional phone number to filter logs
+     */
+    suspend fun getCallLogs(phoneNumber: String? = null): List<CallLogListItem> = withContext(Dispatchers.IO) {
         val callLogs = mutableListOf<AppCallLog>()
 
         try {
+            val selection = if (phoneNumber != null) "${CallLog.Calls.NUMBER} LIKE ?" else null
+            val selectionArgs = if (phoneNumber != null) arrayOf("%$phoneNumber%") else null
+
             val cursor = context.contentResolver.query(
                 CallLog.Calls.CONTENT_URI,
                 arrayOf(
@@ -28,8 +35,8 @@ class CallLogRepository(private val context: Context) {
                     CallLog.Calls.DATE,
                     CallLog.Calls.DURATION
                 ),
-                null,
-                null,
+                selection,
+                selectionArgs,
                 "${CallLog.Calls.DATE} DESC"
             )
 

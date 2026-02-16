@@ -161,7 +161,7 @@ class ContactsFragment : Fragment() {
 
                 if (direction == ItemTouchHelper.LEFT) {
                     // SMS
-                    sendSMS(contact.phoneNumber)
+                    openSmsApp(contact.phoneNumber)
                     contactsAdapter.notifyItemChanged(position) // Reset swipe
                 } else if (direction == ItemTouchHelper.RIGHT) {
                     // Call
@@ -258,12 +258,6 @@ class ContactsFragment : Fragment() {
         }
     }
 
-    private fun sendSMS(number: String) {
-        val intent = Intent(Intent.ACTION_SENDTO).apply {
-            data = Uri.parse("smsto:$number")
-        }
-        startActivity(intent)
-    }
 
 
     override fun onDestroyView() {
