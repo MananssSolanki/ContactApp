@@ -57,9 +57,10 @@ class HistoryCallActivity : AppCompatActivity() {
 
     private fun setupRecyclerView() {
         val recyclerView = findViewById<RecyclerView>(R.id.rv_call_history)
-        callLogAdapter = CallLogAdapter(onCallClick = { number ->
-            makeCall(number)
-        })
+        callLogAdapter = CallLogAdapter(
+            onCallClick = { makeCall(it) },
+            style = 0 // New/History style
+        )
 
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = callLogAdapter

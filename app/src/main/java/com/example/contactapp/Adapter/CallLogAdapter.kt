@@ -13,8 +13,9 @@ import com.example.contactapp.databinding.ItemCallHistoryRowBinding
 import com.example.contactapp.databinding.ItemCallLogHeaderBinding
 
 class CallLogAdapter(
-    private val onCallClick: (String) -> Unit = {},
-    private val onItemClick: (CallLog) -> Unit = {}
+    private val onCallClick: (String) -> Unit,
+    private val onItemClick: (CallLog) -> Unit = {},
+    private val style: Int = 0 // 0 = New/History, 1 = Old/Recent
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val list = ArrayList<CallLogListItem>()
@@ -67,7 +68,7 @@ class CallLogAdapter(
         when (val item = list[position]) {
             is CallLogListItem.Header -> (holder as HeaderViewHolder).bind(item)
             is CallLogListItem.CallItem -> {
-                // Determine background based on position
+                // Determine background based on position (Only relevant for Style 0)
                 val isFirstInGroup = position == 0 || list[position - 1] is CallLogListItem.Header
                 val isLastInGroup = position == list.size - 1 || list[position + 1] is CallLogListItem.Header
                 
@@ -91,69 +92,106 @@ class CallLogAdapter(
         fun bind(item: CallLogListItem.CallItem, isFirst: Boolean, isLast: Boolean) {
             val callLog = item.callLog
 
-            // Set layout params for margin
-            val params = binding.root.layoutParams as RecyclerView.LayoutParams
-            if (isLast) {
-                params.bottomMargin = binding.root.context.resources.getDimensionPixelSize(com.intuit.sdp.R.dimen._8sdp)
-            } else {
-                params.bottomMargin = 0
-            }
-            binding.root.layoutParams = params
-            
-            // Set Time
-            binding.tvTime.text = callLog.getFormattedTime().lowercase()
-
-            // Set Call Type, Icon, and Duration
+            // --- COMMON SETUP (Icons & Colors) ---
             val (statusText, iconRes, color) = when (callLog.callType) {
                 CallLog.CallType.INCOMING -> Triple("Incoming call", android.R.drawable.sym_call_incoming, Color.parseColor("#4CAF50"))
-                CallLog.CallType.OUTGOING -> Triple("Outgoing call", android.R.drawable.sym_call_outgoing, Color.parseColor("#ff9800")) // Orange for outgoing match samsung usually? or Blue. User screenshot shows blue/green. Stick to standard or user request.
+                CallLog.CallType.OUTGOING -> Triple("Outgoing call", android.R.drawable.sym_call_outgoing, Color.parseColor("#ff9800"))
                 CallLog.CallType.MISSED -> Triple("Missed call", android.R.drawable.sym_call_missed, Color.parseColor("#F44336"))
             }
-
-            // Update call type text for Outgoing to match user screenshot style if needed, or keep standard.
-            // Screenshot: "Outgoing call, 0 mins 8 secs"
-            // Duration formatting: "0 mins 8 secs"
-            val durationText = formatDuration(callLog.duration)
-            binding.tvStatusDuration.text = "$statusText, $durationText"
-
             binding.ivCallType.setImageResource(iconRes)
             
-            // User screenshot has colored icons.
-            if (callLog.callType == CallLog.CallType.INCOMING) {
-                binding.ivCallType.setColorFilter(Color.parseColor("#2196F3")) // Blue for incoming in screenshot? No, typically green or blue. Screenshot 8:53pm is outgoing (blue icon). 9:53am Incoming (blue icon). Wait, screenshot shows blue for both? Just arrow direction changes. 
-                // Let's stick to standard colors but apply tint.
-                 binding.ivCallType.setColorFilter(Color.parseColor("#2196F3")) 
-            } else if (callLog.callType == CallLog.CallType.OUTGOING) {
-                 binding.ivCallType.setColorFilter(Color.parseColor("#4CAF50")) // Greenish? Or just Blue as well?
-                 // Let's make them all blueish except missed.
-                 binding.ivCallType.setColorFilter(Color.parseColor("#2196F3"))
+            // Icon Tint Logic
+            val tintColor = if (callLog.callType == CallLog.CallType.MISSED) Color.RED else Color.parseColor("#2196F3")
+            binding.ivCallType.setColorFilter(tintColor)
+
+
+            if (style == 0) {
+                // --- STYLE 0 (New / History / Grouped) ---
+                
+                // Visible Views
+                binding.tvTime.visibility = View.VISIBLE
+                binding.tvStatusDuration.visibility = View.VISIBLE
+                binding.divider.visibility = if (isLast) View.GONE else View.VISIBLE // Divider logic for groups
+
+                // Hidden Views
+                binding.tvContactName.visibility = View.GONE
+                binding.tvPhoneNumber.visibility = View.GONE
+                binding.tvTimeAndDuration.visibility = View.GONE
+                binding.btnCall.visibility = View.GONE
+                
+                // Data Population
+                binding.tvTime.text = callLog.getFormattedTime().lowercase()
+                val durationText = formatDuration(callLog.duration)
+                binding.tvStatusDuration.text = "$statusText, $durationText"
+
+                // Background Logic (Grouped Rounded Corners)
+                val bgRes = when {
+                    isFirst && isLast -> R.drawable.bg_group_item_single
+                    isFirst -> R.drawable.bg_group_item_top
+                    isLast -> R.drawable.bg_group_item_bottom
+                    else -> R.drawable.bg_group_item_middle
+                }
+                binding.rootLayout.setBackgroundResource(bgRes)
+
+                // Margin Logic (Space between groups)
+                val params = binding.root.layoutParams as RecyclerView.LayoutParams
+                if (isLast) {
+                    params.bottomMargin = binding.root.context.resources.getDimensionPixelSize(com.intuit.sdp.R.dimen._8sdp)
+                } else {
+                    params.bottomMargin = 0
+                }
+                binding.root.layoutParams = params
+
             } else {
-                binding.ivCallType.setColorFilter(Color.RED)
-            }
+                // --- STYLE 1 (Old / Recent / Flat) ---
 
-            // Background Logic
-            val bgRes = when {
-                isFirst && isLast -> R.drawable.bg_group_item_single
-                isFirst -> R.drawable.bg_group_item_top
-                isLast -> R.drawable.bg_group_item_bottom
-                else -> R.drawable.bg_group_item_middle
-            }
-            binding.root.setBackgroundResource(bgRes)
+                // Visible Views
+                binding.tvContactName.visibility = View.VISIBLE
+                binding.tvTimeAndDuration.visibility = View.VISIBLE
+                binding.btnCall.visibility = View.VISIBLE
+                // Divider always gone or handled differently? Original design didn't seem to have explicit divider view in item, maybe RecyclerView item decoration?
+                // For now, hide internal divider to match 'flat' look, or show it if desired. Let's hide it for cleaner look or match previous.
+                binding.divider.visibility = View.GONE 
 
-            // Divider Logic
-            binding.divider.visibility = if (isLast) View.GONE else View.VISIBLE
+                // Hidden Views
+                binding.tvTime.visibility = View.GONE
+                binding.tvStatusDuration.visibility = View.GONE
+
+                // Data Population
+                if (callLog.contactName != null) {
+                    binding.tvContactName.text = callLog.contactName
+                    binding.tvPhoneNumber.text = callLog.phoneNumber
+                    binding.tvPhoneNumber.visibility = View.VISIBLE
+                } else {
+                    binding.tvContactName.text = callLog.phoneNumber
+                    binding.tvPhoneNumber.visibility = View.GONE
+                }
+
+                // Color for Missed Calls on Name
+                if (callLog.callType == CallLog.CallType.MISSED) {
+                    binding.tvContactName.setTextColor(Color.RED)
+                } else {
+                    binding.tvContactName.setTextColor(Color.BLACK)
+                }
+
+                // Time & Duration string
+                val durationStr = if (callLog.duration > 0) " • ${callLog.getFormattedDuration()}" else ""
+                binding.tvTimeAndDuration.text = "${callLog.getFormattedTime()}$durationStr"
+
+                // Background Logic (Selectable Flat)
+                val outValue = android.util.TypedValue()
+                binding.root.context.theme.resolveAttribute(android.R.attr.selectableItemBackground, outValue, true)
+                binding.rootLayout.setBackgroundResource(outValue.resourceId)
+
+                // Reset Margins
+                val params = binding.root.layoutParams as RecyclerView.LayoutParams
+                params.bottomMargin = 0
+                binding.root.layoutParams = params
+            }
 
             // Click listeners
-            binding.root.setOnClickListener {
-                onItemClick(callLog)
-            }
-            // No btnCall in new layout, whole row clickable? Or maybe add if needed.
-            // Layout doesn't have btnCall anymore.
-            // onCallClick(callLog.phoneNumber) can be triggered by whole row or long press? 
-            // Standard behavior: click to call or expand. User just said "click on viewmore". 
-            // For now, click -> toggle expanded or do nothing? 
-            // Let's make click -> call for now or detail. Using passed callback.
-            binding.root.setOnClickListener { onCallClick(callLog.phoneNumber) }
+            binding.root.setOnClickListener { onItemClick(callLog) }
+            binding.btnCall.setOnClickListener { onCallClick(callLog.phoneNumber) }
         }
 
         private fun formatDuration(seconds: Long): String {

@@ -54,7 +54,8 @@ class RecentFragment : Fragment() {
                     "Call from ${callLog.contactName ?: callLog.phoneNumber}",
                     Toast.LENGTH_SHORT
                 ).show()
-            }
+            },
+            style = 1 // Pass 1 for Old/Recent style
         )
 
         binding.rvCallLogs.layoutManager = LinearLayoutManager(requireContext())

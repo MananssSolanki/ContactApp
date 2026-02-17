@@ -20,6 +20,7 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.contactapp.Activities.AddContactActivity
 import com.example.contactapp.Activities.ContactInformationActivity
 import com.example.contactapp.Adapter.ContactsAdapter
 import com.example.contactapp.ViewModel.ContactsViewModel
@@ -66,7 +67,8 @@ class ContactsFragment : Fragment() {
 
         binding.btnAddContact.setOnClickListener {
            try {
-               startActivity(viewModel.getAddContactIntent())
+               val intent = Intent(requireContext() , AddContactActivity::class.java)
+               startActivity(intent)
            } catch (e: Exception) {
                Toast.makeText(context, "Cannot open contacts app", Toast.LENGTH_SHORT).show()
            }

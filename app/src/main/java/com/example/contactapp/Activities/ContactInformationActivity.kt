@@ -137,7 +137,10 @@ class ContactInformationActivity : AppCompatActivity() {
 
     private fun setupCallHistory(phoneNumber: String) {
         // Setup adapters
-        callLogAdapterShort = CallLogAdapter(onCallClick = { makeCall(it) })
+        callLogAdapterShort = CallLogAdapter(
+            onCallClick = { makeCall(it) },
+            style = 0 // New/History style
+        )
         binding.rvCallHistoryShort.apply {
             layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this@ContactInformationActivity)
             adapter = callLogAdapterShort
