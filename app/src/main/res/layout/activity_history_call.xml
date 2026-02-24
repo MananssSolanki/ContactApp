@@ -25,6 +25,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"/>
 
         <TextView
+            android:id="@+id/tv_toolbar_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Call History"
@@ -34,6 +35,54 @@
             android:layout_marginStart="@dimen/_16sdp"
             android:layout_gravity="center_vertical"/>
     </androidx.appcompat.widget.Toolbar>
+
+    <!-- Selection Toolbar -->
+    <LinearLayout
+        android:id="@+id/ll_selection_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/teal_700"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="@dimen/_16sdp"
+        android:paddingEnd="@dimen/_16sdp"
+        android:visibility="gone"
+        android:elevation="@dimen/_4sdp">
+
+        <CheckBox
+            android:id="@+id/cb_select_all"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:buttonTint="@android:color/white"/>
+
+        <TextView
+            android:id="@+id/tv_selection_count"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="0 selected"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/_16ssp"
+            android:layout_marginStart="@dimen/_8sdp"/>
+
+        <ImageView
+            android:id="@+id/btn_delete_selected"
+            android:layout_width="@dimen/_32sdp"
+            android:layout_height="@dimen/_32sdp"
+            android:src="@android:drawable/ic_menu_delete"
+            app:tint="@android:color/white"
+            android:padding="@dimen/_6sdp"
+            android:background="?attr/selectableItemBackgroundBorderless"/>
+
+        <ImageView
+            android:id="@+id/btn_cancel_selection"
+            android:layout_width="@dimen/_32sdp"
+            android:layout_height="@dimen/_32sdp"
+            android:src="@android:drawable/ic_menu_close_clear_cancel"
+            app:tint="@android:color/white"
+            android:padding="@dimen/_6sdp"
+            android:background="?attr/selectableItemBackgroundBorderless"/>
+    </LinearLayout>
 
     <FrameLayout
         android:layout_width="match_parent"

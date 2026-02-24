@@ -15,19 +15,15 @@ class DialpadViewModel(app: Application) : AndroidViewModel(app) {
     private val _contactName = MutableLiveData<String?>()
     val contactName: LiveData<String?> = _contactName
 
-    private val _isExistingContact = MutableLiveData<Boolean>(false)
+    private val _isExistingContact = MutableLiveData(false)
     val isExistingContact: LiveData<Boolean> = _isExistingContact
 
-    /**
-     * Look up contact by phone number
-     */
     fun lookupContact(phoneNumber: String) {
         if (phoneNumber.isEmpty()) {
             _contactName.value = null
             _isExistingContact.value = false
             return
         }
-
         viewModelScope.launch {
             val name = findContactByNumber(phoneNumber)
             _contactName.value = name
@@ -35,28 +31,21 @@ class DialpadViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    /**
-     * Find contact name by phone number from device contacts
-     */
     private suspend fun findContactByNumber(phoneNumber: String): String? = withContext(Dispatchers.IO) {
         try {
-            val uri = ContactsContract.PhoneLookup.CONTENT_FILTER_URI
-            val lookupUri = android.net.Uri.withAppendedPath(uri, android.net.Uri.encode(phoneNumber))
-            
-            val cursor = getApplication<Application>().contentResolver.query(
-                lookupUri,
-                arrayOf(ContactsContract.PhoneLookup.DISPLAY_NAME),
-                null,
-                null,
-                null
+            val uri = android.net.Uri.withAppendedPath(
+                ContactsContract.PhoneLookup.CONTENT_FILTER_URI,
+                android.net.Uri.encode(phoneNumber)
             )
-
+            val cursor = getApplication<Application>().contentResolver.query(
+                uri,
+                arrayOf(ContactsContract.PhoneLookup.DISPLAY_NAME),
+                null, null, null
+            )
             cursor?.use {
                 if (it.moveToFirst()) {
-                    val nameIndex = it.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME)
-                    if (nameIndex != -1) {
-                        return@withContext it.getString(nameIndex)
-                    }
+                    val idx = it.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME)
+                    if (idx != -1) return@withContext it.getString(idx)
                 }
             }
             null
@@ -66,33 +55,24 @@ class DialpadViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    /**
-     * Format phone number for display
-     */
     fun formatPhoneNumber(number: String): String {
-        // Basic formatting - can be enhanced with libphonenumber library
+        val cleaned = number.replace(Regex("[^0-9+]"), "")
         return when {
             number.isEmpty() -> ""
-            number.startsWith("+") -> number
-            number.length > 10 -> {
-                // Format: +1 (234) 567-8900
-                val cleaned = number.replace(Regex("[^0-9]"), "")
-                when (cleaned.length) {
-                    11 -> "+${cleaned[0]} (${cleaned.substring(1, 4)}) ${cleaned.substring(4, 7)}-${cleaned.substring(7)}"
-                    10 -> "(${cleaned.substring(0, 3)}) ${cleaned.substring(3, 6)}-${cleaned.substring(6)}"
-                    else -> number
-                }
-            }
+            cleaned.startsWith("+") -> number
+            cleaned.length == 10 -> "(${cleaned.substring(0, 3)}) ${cleaned.substring(3, 6)}-${cleaned.substring(6)}"
+            cleaned.length == 11 -> "+${cleaned[0]} (${cleaned.substring(1, 4)}) ${cleaned.substring(4, 7)}-${cleaned.substring(7)}"
             else -> number
         }
     }
 
     /**
-     * Validate if the number is callable
+     * FIX: Relaxed validation. Accepts 7+ digit numbers (local calls) and numbers with +.
+     * Previous check required 10+ digits which would reject many valid numbers.
      */
     fun isValidPhoneNumber(number: String): Boolean {
-        if (number.isEmpty()) return false
-        val cleaned = number.replace(Regex("[^0-9+]"), "")
-        return cleaned.length >= 10 || (cleaned.startsWith("+") && cleaned.length >= 11)
+        if (number.isBlank()) return false
+        val cleaned = number.replace(Regex("[^0-9+*#]"), "")
+        return cleaned.length >= 3 // Allow emergency numbers, extensions, etc.
     }
 }

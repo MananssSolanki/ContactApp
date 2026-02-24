@@ -1,621 +1,774 @@
 package com.example.contactapp.Activities
 
-import android.Manifest
-import android.accounts.AccountManager
+import android.app.Activity
+import android.app.AlertDialog
+import android.app.DatePickerDialog
 import android.content.ContentProviderOperation
-import android.content.Intent
-import android.content.pm.PackageManager
-import android.graphics.Bitmap
-import android.net.Uri
 import android.os.Bundle
 import android.provider.ContactsContract
-import android.provider.MediaStore
+import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.EditText
-
-import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
+import com.example.contactapp.Model.*
 import com.example.contactapp.R
 import com.example.contactapp.databinding.ActivityAddContactBinding
-import java.io.ByteArrayOutputStream
-import java.io.IOException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.Calendar
+import android.accounts.Account
+import android.accounts.AccountManager
+import android.net.Uri
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia
+import com.bumptech.glide.Glide
+import java.io.ByteArrayOutputStream
 
 class AddContactActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityAddContactBinding
-    private var selectedAccountIndex = 0
-    private var accountNames: MutableList<String> = mutableListOf()
-    private var accountTypes: MutableList<String> = mutableListOf()
-    private var photoBitmap: Bitmap? = null
+    private lateinit var b: ActivityAddContactBinding
+    private var existingContact: ContactEnhanced? = null
+    private var selectedImageUri: Uri? = null
+    private var selectedImageBytes: ByteArray? = null
 
-    private var selectedGroupId: Long? = null
-    private var selectedDate: String? = null
-    private var selectedDateType: Int = ContactsContract.CommonDataKinds.Event.TYPE_BIRTHDAY
-
-    private val requestPermissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            if (permissions[Manifest.permission.WRITE_CONTACTS] == true &&
-                permissions[Manifest.permission.GET_ACCOUNTS] == true
-            ) {
-                loadAccounts()
-            } else {
-                Toast.makeText(this, "Permissions required to create contact", Toast.LENGTH_SHORT).show()
-                finish()
-            }
+    private val pickMedia = registerForActivityResult(PickVisualMedia()) { uri ->
+        if (uri != null) {
+            selectedImageUri = uri
+            selectedImageBytes = uriToBytes(uri)
+            Glide.with(this).load(uri).into(b.ivAvatar)
         }
+    }
 
-    private val pickImageLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == RESULT_OK) {
-                result.data?.data?.let { uri ->
-                    try {
-                        photoBitmap = MediaStore.Images.Media.getBitmap(contentResolver, uri)
-                        binding.ivContactPhoto.setImageBitmap(photoBitmap)
-                    } catch (e: IOException) {
-                        e.printStackTrace()
-                    }
-                }
-            }
-        }
+    // Track every dynamic row view
+    private val phoneRows        = mutableListOf<View>()
+    private val emailRows        = mutableListOf<View>()
+    private val addressRows      = mutableListOf<View>()
+    private val dateRows         = mutableListOf<View>()
+    private val relationRows     = mutableListOf<View>()
+    private val websiteRows      = mutableListOf<View>()
+    private val imRows           = mutableListOf<View>()
+
+    // Mutable date holder stored in row.tag
+    private data class SelDate(var year: Int = 0, var month: Int = 0, var day: Int = 0)
+
+    private data class AccountData(val name: String, val type: String, val email: String)
+    private var selectedAccount: AccountData? = null
+    private var availableAccounts = mutableListOf<AccountData>()
+
+    private val phoneTypes    = arrayOf("Mobile","Home","Work","Main","Work Fax","Home Fax","Pager","Other")
+    private val emailTypes    = arrayOf("Home","Work","Other")
+    private val addrTypes     = arrayOf("Home","Work","Other")
+    private val dateTypes     = arrayOf("Birthday","Anniversary","Other")
+    private val relTypes      = arrayOf("Parent","Mother","Father","Brother","Sister","Spouse","Child","Friend","Relative","Other")
+    private val imProtos      = arrayOf("Hangouts","QQ","Skype","Yahoo","AIM","MSN","ICQ","Jabber","NetMeeting")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityAddContactBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        b = ActivityAddContactBinding.inflate(layoutInflater)
+        setContentView(b.root)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        setupListeners()
-        checkPermissions()
-        setupSpinners()
-    }
+        existingContact = intent.getParcelableExtra("CONTACT_DATA")
 
-    private fun checkPermissions() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_CONTACTS) != PackageManager.PERMISSION_GRANTED ||
-            ContextCompat.checkSelfPermission(this, Manifest.permission.GET_ACCOUNTS) != PackageManager.PERMISSION_GRANTED
-        ) {
-            requestPermissionLauncher.launch(
-                arrayOf(
-                    Manifest.permission.WRITE_CONTACTS,
-                    Manifest.permission.GET_ACCOUNTS
-                )
-            )
+        if (existingContact != null) {
+            supportActionBar?.title = "Edit Contact"
+            b.btnSave.text = "Update"
+            prefill(existingContact!!)
         } else {
-            loadAccounts()
-        }
-    }
-
-    private fun setupListeners() {
-        binding.btnCancel.setOnClickListener { finish() }
-        binding.btnSave.setOnClickListener { saveContact() }
-
-        binding.ivContactPhoto.setOnClickListener {
-            val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-            pickImageLauncher.launch(intent)
+            supportActionBar?.title = "New Contact"
+            b.btnSave.text = "Save"
+            addPhoneRow()
+            addEmailRow()
         }
 
-        binding.btnExpandName.setOnClickListener {
-            if (binding.layoutMoreNameFields.visibility == View.VISIBLE) {
-                binding.layoutMoreNameFields.visibility = View.GONE
-                binding.btnExpandName.animate().rotation(0f).start()
-            } else {
-                binding.layoutMoreNameFields.visibility = View.VISIBLE
-                binding.btnExpandName.animate().rotation(180f).start()
-            }
+        // Name expand/collapse
+        b.layoutNameExpand.setOnClickListener {
+            val show = b.expandedNameFields.visibility != View.VISIBLE
+            b.expandedNameFields.visibility = if (show) View.VISIBLE else View.GONE
+            b.ivNameArrow.rotation = if (show) 180f else 0f
         }
 
-        binding.tvViewMore.setOnClickListener {
-            if (binding.layoutMoreFields.visibility == View.VISIBLE) {
-                binding.layoutMoreFields.visibility = View.GONE
-                binding.tvViewMore.text = "View more"
-                binding.tvViewMore.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
-            } else {
-                binding.layoutMoreFields.visibility = View.VISIBLE
-                binding.tvViewMore.text = "View less"
-            }
+        b.btnAddPhone.setOnClickListener        { addPhoneRow() }
+        b.btnAddEmail.setOnClickListener        { addEmailRow() }
+        b.btnAddAddress.setOnClickListener      { addAddressRow() }
+        b.btnAddDate.setOnClickListener         { addDateRow() }
+        b.btnAddRelationship.setOnClickListener { addRelationRow() }
+        b.btnAddWebsite.setOnClickListener      { addWebsiteRow() }
+        b.btnAddIm.setOnClickListener           { addImRow() }
+
+        b.btnSave.setOnClickListener   { onSave() }
+        b.btnCancel.setOnClickListener { finish() }
+
+        loadAccounts()
+        b.layoutAccount.setOnClickListener { showAccountSelectionDialog() }
+
+        b.ivAvatar.setOnClickListener {
+            pickMedia.launch(PickVisualMediaRequest(PickVisualMedia.ImageOnly))
         }
-
-        binding.layoutGroups.setOnClickListener { showGroupSelectionDialog() }
-
-        // Dynamic Add Buttons
-        binding.tvAddPhone.setOnClickListener { addPhoneRow() }
-        binding.tvAddEmail.setOnClickListener { addEmailRow() }
-        binding.tvAddAddress.setOnClickListener { addAddressRow() }
-        binding.tvAddDate.setOnClickListener { addDateRow() }
-        binding.tvAddWebsite.setOnClickListener { addWebsiteRow() }
-        binding.tvAddMessenger.setOnClickListener { addMessengerRow() }
-        binding.tvAddRelation.setOnClickListener { addRelationRow() }
     }
-
-    private fun setupSpinners() {
-         // Initial rows
-         addPhoneRow()
-         addEmailRow()
-    }
-
-    private fun addPhoneRow() {
-        val view = layoutInflater.inflate(R.layout.layout_row_dynamic_entry, binding.llPhoneContainer, false)
-        val etValue = view.findViewById<EditText>(R.id.et_value)
-        val spinner = view.findViewById<android.widget.Spinner>(R.id.spinner_type)
-        val ivRemove = view.findViewById<View>(R.id.iv_remove)
-
-        etValue.hint = "Phone"
-        etValue.inputType = android.text.InputType.TYPE_CLASS_PHONE
-
-        val types = listOf("Mobile", "Work", "Home", "Main", "Fax", "Other")
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, types)
-        spinner.adapter = adapter
-
-        ivRemove.setOnClickListener { binding.llPhoneContainer.removeView(view) }
-        binding.llPhoneContainer.addView(view)
-    }
-
-    private fun addEmailRow() {
-        val view = layoutInflater.inflate(R.layout.layout_row_dynamic_entry, binding.llEmailContainer, false)
-        val etValue = view.findViewById<EditText>(R.id.et_value)
-        val spinner = view.findViewById<android.widget.Spinner>(R.id.spinner_type)
-        val ivRemove = view.findViewById<View>(R.id.iv_remove)
-
-        etValue.hint = "Email"
-        etValue.inputType = android.text.InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
-
-        val types = listOf("Home", "Work", "Other", "Mobile")
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, types)
-        spinner.adapter = adapter
-
-        ivRemove.setOnClickListener { binding.llEmailContainer.removeView(view) }
-        binding.llEmailContainer.addView(view)
-    }
-
-    private fun addAddressRow() {
-        val view = layoutInflater.inflate(R.layout.layout_row_dynamic_address, binding.llAddressContainer, false)
-        val spinner = view.findViewById<android.widget.Spinner>(R.id.spinner_type)
-        val ivRemove = view.findViewById<View>(R.id.iv_remove)
-
-        val types = listOf("Home", "Work", "Other")
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, types)
-        spinner.adapter = adapter
-
-        ivRemove.setOnClickListener { binding.llAddressContainer.removeView(view) }
-        binding.llAddressContainer.addView(view)
-    }
-
-    private fun addDateRow() {
-        val view = layoutInflater.inflate(R.layout.layout_row_dynamic_date, binding.llDateContainer, false)
-        val spinner = view.findViewById<android.widget.Spinner>(R.id.spinner_type)
-        val tvDate = view.findViewById<android.widget.TextView>(R.id.tv_date)
-        val ivRemove = view.findViewById<View>(R.id.iv_remove)
-
-        val types = listOf("Birthday", "Anniversary", "Other")
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, types)
-        spinner.adapter = adapter
-
-        tvDate.setOnClickListener {
-             val c = Calendar.getInstance()
-            android.app.DatePickerDialog(this, { _, year, month, day ->
-                val dateStr = String.format("%d-%02d-%02d", year, month + 1, day)
-                tvDate.text = dateStr
-            }, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH)).show()
-        }
-
-        ivRemove.setOnClickListener { binding.llDateContainer.removeView(view) }
-        binding.llDateContainer.addView(view)
-    }
-
-    private fun addWebsiteRow() {
-        val view = layoutInflater.inflate(R.layout.layout_row_dynamic_entry, binding.llWebsiteContainer, false)
-        val etValue = view.findViewById<EditText>(R.id.et_value)
-        val spinner = view.findViewById<android.widget.Spinner>(R.id.spinner_type)
-        val ivRemove = view.findViewById<View>(R.id.iv_remove)
-
-        etValue.hint = "Website"
-        etValue.inputType = android.text.InputType.TYPE_TEXT_VARIATION_URI
-
-        val types = listOf("Homepage", "Blog", "Profile", "Home", "Work", "Other")
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, types)
-        spinner.adapter = adapter
-
-        ivRemove.setOnClickListener { binding.llWebsiteContainer.removeView(view) }
-        binding.llWebsiteContainer.addView(view)
-    }
-
-    private fun addMessengerRow() {
-        val view = layoutInflater.inflate(R.layout.layout_row_dynamic_entry, binding.llMessengerContainer, false)
-        val etValue = view.findViewById<EditText>(R.id.et_value)
-        val spinner = view.findViewById<android.widget.Spinner>(R.id.spinner_type)
-        val ivRemove = view.findViewById<View>(R.id.iv_remove)
-
-        etValue.hint = "Messenger ID"
-
-        val types = listOf("WhatsApp", "Facebook", "Hangouts", "Skype", "QQ", "Other")
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, types)
-        spinner.adapter = adapter
-
-        ivRemove.setOnClickListener { binding.llMessengerContainer.removeView(view) }
-        binding.llMessengerContainer.addView(view)
-    }
-
-    private fun addRelationRow() {
-         val view = layoutInflater.inflate(R.layout.layout_row_dynamic_entry, binding.llRelationContainer, false)
-        val etValue = view.findViewById<EditText>(R.id.et_value)
-        val spinner = view.findViewById<android.widget.Spinner>(R.id.spinner_type)
-        val ivRemove = view.findViewById<View>(R.id.iv_remove)
-
-        etValue.hint = "Name"
-        etValue.inputType = android.text.InputType.TYPE_TEXT_VARIATION_PERSON_NAME
-
-        val types = listOf("Assistant", "Brother", "Child", "Domestic Partner", "Father", "Friend", "Manager", "Mother", "Parent", "Partner", "Referred by", "Relative", "Sister", "Spouse")
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, types)
-        spinner.adapter = adapter
-
-        ivRemove.setOnClickListener { binding.llRelationContainer.removeView(view) }
-        binding.llRelationContainer.addView(view)
-    }
-
 
     private fun loadAccounts() {
-        accountNames.clear()
-        accountTypes.clear()
-
-        // Add "Phone" / Device-only option
-        accountNames.add("Phone")
-        accountTypes.add("vnd.sec.contact.phone")
-
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.GET_ACCOUNTS) == PackageManager.PERMISSION_GRANTED) {
-            val accounts = AccountManager.get(this).accounts
-            for (account in accounts) {
-                if (account.type.contains("google") ||
-                    account.type.contains("samsung") ||
-                    account.type.contains("xiaomi") ||
-                    account.type.contains("whatsapp")) {
-                        accountNames.add(account.name)
-                        accountTypes.add(account.type)
-                }
-            }
+        val am = AccountManager.get(this)
+        val accounts = am.accounts
+        availableAccounts.clear()
+        
+        // Add "Phone" / "Local" option
+        availableAccounts.add(AccountData("Phone", "Local", "Device only"))
+        
+        for (acc in accounts) {
+            availableAccounts.add(AccountData(acc.name, acc.type, acc.name))
         }
-
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, accountNames)
-        binding.spinnerAccounts.adapter = adapter
-
-        binding.spinnerAccounts.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                selectedAccountIndex = position
-            }
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        
+        // Default selection: Phone if no others, or the first real account
+        if (availableAccounts.size > 1) {
+            updateSelectedAccount(availableAccounts[1])
+        } else {
+            updateSelectedAccount(availableAccounts[0])
         }
     }
 
-    private fun showGroupSelectionDialog() {
-        val groups = mutableListOf<String>()
-        val groupIds = mutableListOf<Long>()
-
-        // Query Groups
-        val projection = arrayOf(ContactsContract.Groups._ID, ContactsContract.Groups.TITLE)
-        val cursor = contentResolver.query(ContactsContract.Groups.CONTENT_URI, projection, null, null, null)
-        cursor?.use {
-            while (it.moveToNext()) {
-                val id = it.getLong(0)
-                val title = it.getString(1)
-                if (title != null) {
-                    groups.add(title)
-                    groupIds.add(id)
-                }
-            }
-        }
-        groups.add("Create new group")
-
+    private fun showAccountSelectionDialog() {
+        val names = availableAccounts.map { "${it.name} (${it.type})" }.toTypedArray()
         AlertDialog.Builder(this)
-            .setTitle("Select Group")
-            .setItems(groups.toTypedArray()) { _, which ->
-                if (which == groups.size - 1) {
-                    showCreateGroupDialog()
-                } else {
-                    selectedGroupId = groupIds[which]
-                    binding.tvGroupName.text = groups[which]
-                }
+            .setTitle("Save contact to")
+            .setItems(names) { _, i ->
+                updateSelectedAccount(availableAccounts[i])
             }
             .show()
     }
 
-    private fun showCreateGroupDialog() {
-        val input = EditText(this)
-        input.hint = "Group Name"
-
-        AlertDialog.Builder(this)
-            .setTitle("Create Group")
-            .setView(input)
-            .setPositiveButton("Create") { _, _ ->
-                val groupName = input.text.toString().trim()
-                if (groupName.isNotEmpty()) {
-                    createNewGroup(groupName)
-                }
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
+    private fun updateSelectedAccount(acc: AccountData) {
+        selectedAccount = acc
+        b.tvAccountName.text = acc.name
+        b.tvAccountEmail.text = acc.email
+        // Simple heuristic for icon
+        val iconRes = when {
+            acc.type.contains("google", ignoreCase = true) -> R.drawable.ic_launcher_background // Should use a google icon if available
+            acc.type == "Local" -> android.R.drawable.ic_menu_call
+            else -> android.R.drawable.ic_menu_myplaces
+        }
+        b.ivAccountIcon.setImageResource(iconRes)
     }
 
-    private fun createNewGroup(groupName: String) {
-        val ops = ArrayList<ContentProviderOperation>()
-        ops.add(ContentProviderOperation.newInsert(ContactsContract.Groups.CONTENT_URI)
-            .withValue(ContactsContract.Groups.TITLE, groupName)
-            .withValue(ContactsContract.Groups.GROUP_VISIBLE, 1)
-            .build())
+    // ── Pre-fill all fields in edit mode ─────────────────────────────────────
 
-        try {
-            contentResolver.applyBatch(ContactsContract.AUTHORITY, ops)
-            Toast.makeText(this, "Group created", Toast.LENGTH_SHORT).show()
-             
-             // Re-query to get ID
-             val cursor = contentResolver.query(
-                 ContactsContract.Groups.CONTENT_URI,
-                 arrayOf(ContactsContract.Groups._ID),
-                 "${ContactsContract.Groups.TITLE} = ?",
-                 arrayOf(groupName),
-                 null
-             )
-             cursor?.use {
-                 if (it.moveToFirst()) {
-                     selectedGroupId = it.getLong(0)
-                     binding.tvGroupName.text = groupName
-                 }
-             }
+    private fun prefill(c: ContactEnhanced) {
+        b.etDisplayName.setText(c.name)
+        b.etNamePrefix.setText(c.namePrefix   ?: "")
+        b.etFirstName.setText(c.firstName     ?: "")
+        b.etMiddleName.setText(c.middleName   ?: "")
+        b.etLastName.setText(c.lastName       ?: "")
+        b.etNameSuffix.setText(c.nameSuffix   ?: "")
+        b.etPhoneticName.setText(c.phoneticName ?: "")
+        b.etNickname.setText(c.nickname       ?: "")
+        b.etJobTitle.setText(c.jobTitle       ?: "")
+        b.etDepartment.setText(c.department   ?: "")
+        b.etCompany.setText(c.company         ?: "")
+        b.etNotes.setText(c.notes             ?: "")
 
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Toast.makeText(this, "Failed to create group", Toast.LENGTH_SHORT).show()
+        if (c.photoUri != null) {
+            Glide.with(this)
+                .load(Uri.parse(c.photoUri))
+                .placeholder(R.drawable.ic_launcher_foreground)
+                .error(R.drawable.ic_launcher_foreground)
+                .into(b.ivAvatar)
+        } else {
+            b.ivAvatar.setImageResource(R.drawable.ic_launcher_foreground)
+        }
+
+        if (c.phones.isEmpty()) addPhoneRow() else c.phones.forEach { addPhoneRow(it.number, it.typeLabel) }
+        if (c.emails.isEmpty()) addEmailRow() else c.emails.forEach { addEmailRow(it.address, it.typeLabel) }
+        c.addresses.forEach      { addAddressRow(it) }
+        c.importantDates.forEach { addDateRow(it) }
+        c.relationships.forEach  { addRelationRow(it.name, it.typeLabel) }
+        c.websites.forEach       { addWebsiteRow(it) }
+        c.imAccounts.forEach     { addImRow(it.account, it.protocol) }
+
+        // Fetch account info for existing contact
+        lifecycleScope.launch(Dispatchers.IO) {
+            val raw = getRawInfo(c.contactId)
+            withContext(Dispatchers.Main) {
+                raw?.let { updateSelectedAccount(it) }
+                // Disable account selection in edit mode
+                b.layoutAccount.isClickable = false
+                b.ivAccountArrow.visibility = View.GONE
+            }
         }
     }
 
-    private fun saveContact() {
-        val name = binding.etName.text.toString().trim()
-        
-        // Check dynamic fields for at least one entry
-        var hasPhone = false
-        for (i in 0 until binding.llPhoneContainer.childCount) {
-             val view = binding.llPhoneContainer.getChildAt(i)
-             val et = view.findViewById<EditText>(R.id.et_value)
-             if (et.text.toString().trim().isNotEmpty()) hasPhone = true
+    private fun getRawInfo(contactId: String): AccountData? = try {
+        contentResolver.query(
+            ContactsContract.RawContacts.CONTENT_URI,
+            arrayOf(ContactsContract.RawContacts.ACCOUNT_NAME, ContactsContract.RawContacts.ACCOUNT_TYPE),
+            "${ContactsContract.RawContacts.CONTACT_ID}=? AND ${ContactsContract.RawContacts.DELETED}=0",
+            arrayOf(contactId), null
+        )?.use { 
+            if (it.moveToFirst()) {
+                val name = it.getString(0) ?: "Phone"
+                val type = it.getString(1) ?: "Local"
+                AccountData(name, type, if (type == "Local") "Device only" else name)
+            } else null 
         }
-        var hasEmail = false
-        for (i in 0 until binding.llEmailContainer.childCount) {
-             val view = binding.llEmailContainer.getChildAt(i)
-             val et = view.findViewById<EditText>(R.id.et_value)
-             if (et.text.toString().trim().isNotEmpty()) hasEmail = true
+    } catch (e: Exception) { e.printStackTrace(); null }
+
+    // ── Row builders ─────────────────────────────────────────────────────────
+
+    private fun addPhoneRow(number: String = "", type: String = "Mobile") {
+        val row = inflate(R.layout.row_phone)
+        row.find<EditText>(R.id.etPhone).setText(number)
+        row.find<TextView>(R.id.tvPhoneType).also { tv ->
+            tv.text = type
+            tv.setOnClickListener { pick(phoneTypes, tv) }
+        }
+        row.find<ImageButton>(R.id.btnRemovePhone).setOnClickListener { remove(row, b.phoneContainer, phoneRows) }
+        b.phoneContainer.addView(row); phoneRows.add(row)
+    }
+
+    private fun addEmailRow(address: String = "", type: String = "Home") {
+        val row = inflate(R.layout.row_email)
+        row.find<EditText>(R.id.etEmail).setText(address)
+        row.find<TextView>(R.id.tvEmailType).also { tv ->
+            tv.text = type
+            tv.setOnClickListener { pick(emailTypes, tv) }
+        }
+        row.find<ImageButton>(R.id.btnRemoveEmail).setOnClickListener { remove(row, b.emailContainer, emailRows) }
+        b.emailContainer.addView(row); emailRows.add(row)
+    }
+
+    private fun addAddressRow(entry: AddressEntry? = null) {
+        val row = inflate(R.layout.row_address)
+        entry?.let {
+            row.find<TextView>(R.id.tvAddressType).text = it.typeLabel
+            row.find<EditText>(R.id.etStreet).setText(it.street)
+            row.find<EditText>(R.id.etCity).setText(it.city)
+            row.find<EditText>(R.id.etState).setText(it.state)
+            row.find<EditText>(R.id.etPostcode).setText(it.postcode)
+            row.find<EditText>(R.id.etCountry).setText(it.country)
+        }
+        row.find<TextView>(R.id.tvAddressType).setOnClickListener { pick(addrTypes, row.find(R.id.tvAddressType)) }
+        row.find<ImageButton>(R.id.btnRemoveAddress).setOnClickListener { remove(row, b.addressContainer, addressRows) }
+        b.addressContainer.addView(row); addressRows.add(row)
+    }
+
+    private fun addDateRow(entry: DateEntry? = null) {
+        val row = inflate(R.layout.row_date)
+        val sel = SelDate(entry?.year ?: 0, entry?.month ?: 0, entry?.day ?: 0)
+        row.tag = sel
+
+        val tvType  = row.find<TextView>(R.id.tvDateType)
+        val btnDate = row.find<Button>(R.id.btnPickDate)
+
+        entry?.let {
+            tvType.text = it.typeLabel
+            if (it.day > 0 && it.month > 0) btnDate.text = fmtDate(it.year, it.month, it.day)
         }
 
-        if (name.isEmpty() && !hasPhone && !hasEmail) {
-            Toast.makeText(this, "Please enter at least a Name, Phone, or Email", Toast.LENGTH_SHORT).show()
-            return
+        tvType.setOnClickListener { pick(dateTypes, tvType) }
+        btnDate.setOnClickListener {
+            val cal = Calendar.getInstance()
+            DatePickerDialog(this, { _, y, m, d ->
+                sel.year = y; sel.month = m + 1; sel.day = d
+                btnDate.text = fmtDate(y, m + 1, d)
+            },
+                if (sel.year > 0) sel.year else cal.get(Calendar.YEAR),
+                if (sel.month > 0) sel.month - 1 else cal.get(Calendar.MONTH),
+                if (sel.day > 0) sel.day else cal.get(Calendar.DAY_OF_MONTH)
+            ).show()
+        }
+        row.find<ImageButton>(R.id.btnRemoveDate).setOnClickListener { remove(row, b.dateContainer, dateRows) }
+        b.dateContainer.addView(row); dateRows.add(row)
+    }
+
+    private fun addRelationRow(name: String = "", type: String = "Parent") {
+        val row = inflate(R.layout.row_relationship)
+        row.find<EditText>(R.id.etRelationshipName).setText(name)
+        row.find<TextView>(R.id.tvRelationshipType).also { tv ->
+            tv.text = type
+            tv.setOnClickListener { pick(relTypes, tv) }
+        }
+        row.find<ImageButton>(R.id.btnRemoveRelationship).setOnClickListener { remove(row, b.relationshipContainer, relationRows) }
+        b.relationshipContainer.addView(row); relationRows.add(row)
+    }
+
+    private fun addWebsiteRow(url: String = "") {
+        val row = inflate(R.layout.row_website)
+        row.find<EditText>(R.id.etWebsite).setText(url)
+        row.find<ImageButton>(R.id.btnRemoveWebsite).setOnClickListener { remove(row, b.websiteContainer, websiteRows) }
+        b.websiteContainer.addView(row); websiteRows.add(row)
+    }
+
+    private fun addImRow(account: String = "", proto: String = "Hangouts") {
+        val row = inflate(R.layout.row_im)
+        row.find<EditText>(R.id.etImAccount).setText(account)
+        row.find<TextView>(R.id.tvImProtocol).also { tv ->
+            tv.text = proto
+            tv.setOnClickListener { pick(imProtos, tv) }
+        }
+        row.find<ImageButton>(R.id.btnRemoveIm).setOnClickListener { remove(row, b.imContainer, imRows) }
+        b.imContainer.addView(row); imRows.add(row)
+    }
+
+    // ── Collect and save ──────────────────────────────────────────────────────
+
+    private fun onSave() {
+        // Display name
+        var displayName = b.etDisplayName.text.toString().trim()
+        if (displayName.isEmpty()) {
+            displayName = listOfNotNull(
+                b.etFirstName.text.toString().trim().ifEmpty { null },
+                b.etMiddleName.text.toString().trim().ifEmpty { null },
+                b.etLastName.text.toString().trim().ifEmpty { null }
+            ).joinToString(" ")
+        }
+        if (displayName.isEmpty()) {
+            b.etDisplayName.error = "Name is required"; b.etDisplayName.requestFocus(); return
         }
 
-        val ops = ArrayList<ContentProviderOperation>()
-        val rawContactInsertIndex = ops.size
+        // Phones (required)
+        val phones = phoneRows.mapNotNull { row ->
+            val n = row.find<EditText>(R.id.etPhone).text.toString().trim()
+            val t = row.find<TextView>(R.id.tvPhoneType).text.toString()
+            if (n.isNotEmpty()) PhoneEntry(n, t) else null
+        }
+        if (phones.isEmpty()) {
+            Toast.makeText(this, "At least one phone number is required", Toast.LENGTH_SHORT).show(); return
+        }
 
-        // 1. Insert RawContact
-        val accountType = accountTypes.getOrElse(selectedAccountIndex) { null }
-        val accountName = accountNames.getOrElse(selectedAccountIndex) { "Phone" }
+        // Emails
+        val emails = emailRows.mapNotNull { row ->
+            val a = row.find<EditText>(R.id.etEmail).text.toString().trim()
+            val t = row.find<TextView>(R.id.tvEmailType).text.toString()
+            if (a.isNotEmpty()) EmailEntry(a, t) else null
+        }
 
-        val op = ContentProviderOperation.newInsert(ContactsContract.RawContacts.CONTENT_URI)
-            .withValue(ContactsContract.RawContacts.ACCOUNT_TYPE, if (accountName == "Phone") null else accountType)
-            .withValue(ContactsContract.RawContacts.ACCOUNT_NAME, if (accountName == "Phone") null else accountName)
-            .withValue(ContactsContract.RawContacts.STARRED, if (binding.cbFavorite.isChecked) 1 else 0)
-        ops.add(op.build())
+        // Addresses
+        val addresses = addressRows.mapNotNull { row ->
+            val street  = row.find<EditText>(R.id.etStreet).text.toString().trim()
+            val city    = row.find<EditText>(R.id.etCity).text.toString().trim()
+            val state   = row.find<EditText>(R.id.etState).text.toString().trim()
+            val post    = row.find<EditText>(R.id.etPostcode).text.toString().trim()
+            val country = row.find<EditText>(R.id.etCountry).text.toString().trim()
+            val type    = row.find<TextView>(R.id.tvAddressType).text.toString()
+            if (street.isNotEmpty() || city.isNotEmpty() || country.isNotEmpty())
+                AddressEntry(street, city, state, post, country, type) else null
+        }
 
-        // 2. Insert Name
-        val firstName = binding.etFirstName.text.toString().trim()
-        val lastName = binding.etLastName.text.toString().trim()
-        val nameBuilder = ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
-                .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, rawContactInsertIndex)
-                .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE)
+        // Dates
+        val dates = dateRows.mapNotNull { row ->
+            val sel  = row.tag as? SelDate ?: return@mapNotNull null
+            val type = row.find<TextView>(R.id.tvDateType).text.toString()
+            if (sel.month > 0 && sel.day > 0) DateEntry(sel.year, sel.month, sel.day, type) else null
+        }
 
-        if (name.isNotEmpty()) nameBuilder.withValue(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME, name)
-        if (firstName.isNotEmpty()) nameBuilder.withValue(ContactsContract.CommonDataKinds.StructuredName.GIVEN_NAME, firstName)
-        if (lastName.isNotEmpty()) nameBuilder.withValue(ContactsContract.CommonDataKinds.StructuredName.FAMILY_NAME, lastName)
-        ops.add(nameBuilder.build())
+        // Relationships
+        val rels = relationRows.mapNotNull { row ->
+            val n = row.find<EditText>(R.id.etRelationshipName).text.toString().trim()
+            val t = row.find<TextView>(R.id.tvRelationshipType).text.toString()
+            if (n.isNotEmpty()) RelationshipEntry(n, t) else null
+        }
 
-        // 3. Insert Phones
-        for (i in 0 until binding.llPhoneContainer.childCount) {
-            val view = binding.llPhoneContainer.getChildAt(i)
-            val phone = view.findViewById<EditText>(R.id.et_value).text.toString().trim()
-            if (phone.isNotEmpty()) {
-                val typeStr = view.findViewById<android.widget.Spinner>(R.id.spinner_type).selectedItem.toString()
-                ops.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
-                    .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, rawContactInsertIndex)
-                    .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
-                    .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, phone)
-                    .withValue(ContactsContract.CommonDataKinds.Phone.TYPE, getPhoneType(typeStr))
-                    .build())
+        // Websites
+        val websites = websiteRows.mapNotNull { row ->
+            row.find<EditText>(R.id.etWebsite).text.toString().trim().ifEmpty { null }
+        }
+
+        // IM
+        val ims = imRows.mapNotNull { row ->
+            val a = row.find<EditText>(R.id.etImAccount).text.toString().trim()
+            val p = row.find<TextView>(R.id.tvImProtocol).text.toString()
+            if (a.isNotEmpty()) ImEntry(a, p) else null
+        }
+
+        val namePrefix   = b.etNamePrefix.text.toString().trim()
+        val firstName    = b.etFirstName.text.toString().trim()
+        val middleName   = b.etMiddleName.text.toString().trim()
+        val lastName     = b.etLastName.text.toString().trim()
+        val nameSuffix   = b.etNameSuffix.text.toString().trim()
+        val phoneticName = b.etPhoneticName.text.toString().trim()
+        val nickname     = b.etNickname.text.toString().trim()
+        val jobTitle     = b.etJobTitle.text.toString().trim()
+        val department   = b.etDepartment.text.toString().trim()
+        val company      = b.etCompany.text.toString().trim()
+        val notes        = b.etNotes.text.toString().trim()
+
+        b.btnSave.isEnabled = false
+        b.progressSave.visibility = View.VISIBLE
+
+        val contact = existingContact
+        if (contact != null) {
+            doUpdate(contact.contactId, displayName, namePrefix, firstName, middleName, lastName,
+                nameSuffix, phoneticName, nickname, phones, emails, jobTitle, department, company,
+                addresses, dates, rels, notes, websites, ims)
+        } else {
+            doInsert(displayName, namePrefix, firstName, middleName, lastName, nameSuffix,
+                phoneticName, nickname, phones, emails, jobTitle, department, company,
+                addresses, dates, rels, notes, websites, ims)
+        }
+    }
+
+    // ── INSERT ────────────────────────────────────────────────────────────────
+
+    private fun doInsert(
+        displayName: String, namePrefix: String, firstName: String, middleName: String,
+        lastName: String, nameSuffix: String, phoneticName: String, nickname: String,
+        phones: List<PhoneEntry>, emails: List<EmailEntry>,
+        jobTitle: String, department: String, company: String,
+        addresses: List<AddressEntry>, dates: List<DateEntry>,
+        rels: List<RelationshipEntry>, notes: String,
+        websites: List<String>, ims: List<ImEntry>
+    ) {
+        lifecycleScope.launch {
+            val err = withContext(Dispatchers.IO) {
+                try {
+                    val ops = ArrayList<ContentProviderOperation>()
+                    val ri = 0 // rawIdx
+
+                    // Raw contact
+                    ops += op { ContentProviderOperation.newInsert(ContactsContract.RawContacts.CONTENT_URI)
+                        .withValue(ContactsContract.RawContacts.ACCOUNT_TYPE, selectedAccount?.type.takeIf { it != "Local" })
+                        .withValue(ContactsContract.RawContacts.ACCOUNT_NAME, selectedAccount?.name.takeIf { it != "Phone" && it != "Local" })
+                        .build() }
+
+                    // Structured name
+                    ops += ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                        .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, ri)
+                        .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE)
+                        .withValue(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME, displayName)
+                        .withValue(ContactsContract.CommonDataKinds.StructuredName.PREFIX, namePrefix)
+                        .withValue(ContactsContract.CommonDataKinds.StructuredName.GIVEN_NAME, firstName)
+                        .withValue(ContactsContract.CommonDataKinds.StructuredName.MIDDLE_NAME, middleName)
+                        .withValue(ContactsContract.CommonDataKinds.StructuredName.FAMILY_NAME, lastName)
+                        .withValue(ContactsContract.CommonDataKinds.StructuredName.SUFFIX, nameSuffix)
+                        .withValue(ContactsContract.CommonDataKinds.StructuredName.PHONETIC_GIVEN_NAME, phoneticName)
+                        .build()
+
+                    // Nickname
+                    if (nickname.isNotEmpty()) ops += ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                        .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, ri)
+                        .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Nickname.CONTENT_ITEM_TYPE)
+                        .withValue(ContactsContract.CommonDataKinds.Nickname.NAME, nickname).build()
+
+                    // Phones
+                    for (p in phones) ops += ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                        .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, ri)
+                        .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+                        .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, p.number)
+                        .withValue(ContactsContract.CommonDataKinds.Phone.TYPE, phoneTypeInt(p.typeLabel))
+                        .withValue(ContactsContract.CommonDataKinds.Phone.LABEL, p.typeLabel).build()
+
+                    // Photo
+                    if (selectedImageBytes != null) {
+                        ops += ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                            .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, ri)
+                            .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Photo.CONTENT_ITEM_TYPE)
+                            .withValue(ContactsContract.CommonDataKinds.Photo.PHOTO, selectedImageBytes)
+                            .build()
+                    }
+
+                    // Emails
+                    for (e in emails) ops += ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                        .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, ri)
+                        .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE)
+                        .withValue(ContactsContract.CommonDataKinds.Email.ADDRESS, e.address)
+                        .withValue(ContactsContract.CommonDataKinds.Email.TYPE, emailTypeInt(e.typeLabel))
+                        .withValue(ContactsContract.CommonDataKinds.Email.LABEL, e.typeLabel).build()
+
+                    // Organization
+                    if (jobTitle.isNotEmpty() || department.isNotEmpty() || company.isNotEmpty())
+                        ops += ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                            .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, ri)
+                            .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Organization.CONTENT_ITEM_TYPE)
+                            .withValue(ContactsContract.CommonDataKinds.Organization.TITLE, jobTitle)
+                            .withValue(ContactsContract.CommonDataKinds.Organization.DEPARTMENT, department)
+                            .withValue(ContactsContract.CommonDataKinds.Organization.COMPANY, company).build()
+
+                    // Addresses
+                    for (a in addresses) ops += ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                        .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, ri)
+                        .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.StructuredPostal.CONTENT_ITEM_TYPE)
+                        .withValue(ContactsContract.CommonDataKinds.StructuredPostal.TYPE, addrTypeInt(a.typeLabel))
+                        .withValue(ContactsContract.CommonDataKinds.StructuredPostal.STREET, a.street)
+                        .withValue(ContactsContract.CommonDataKinds.StructuredPostal.CITY, a.city)
+                        .withValue(ContactsContract.CommonDataKinds.StructuredPostal.REGION, a.state)
+                        .withValue(ContactsContract.CommonDataKinds.StructuredPostal.POSTCODE, a.postcode)
+                        .withValue(ContactsContract.CommonDataKinds.StructuredPostal.COUNTRY, a.country).build()
+
+                    // Dates
+                    for (d in dates) ops += ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                        .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, ri)
+                        .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Event.CONTENT_ITEM_TYPE)
+                        .withValue(ContactsContract.CommonDataKinds.Event.TYPE, dateTypeInt(d.typeLabel))
+                        .withValue(ContactsContract.CommonDataKinds.Event.START_DATE, "%04d-%02d-%02d".format(d.year, d.month, d.day)).build()
+
+                    // Relationships
+                    for (r in rels) ops += ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                        .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, ri)
+                        .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Relation.CONTENT_ITEM_TYPE)
+                        .withValue(ContactsContract.CommonDataKinds.Relation.NAME, r.name)
+                        .withValue(ContactsContract.CommonDataKinds.Relation.TYPE, relTypeInt(r.typeLabel)).build()
+
+                    // Notes
+                    if (notes.isNotEmpty()) ops += ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                        .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, ri)
+                        .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Note.CONTENT_ITEM_TYPE)
+                        .withValue(ContactsContract.CommonDataKinds.Note.NOTE, notes).build()
+
+                    // Websites
+                    for (w in websites) ops += ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                        .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, ri)
+                        .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Website.CONTENT_ITEM_TYPE)
+                        .withValue(ContactsContract.CommonDataKinds.Website.URL, w).build()
+
+                    // IM
+                    for (im in ims) ops += ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                        .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, ri)
+                        .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Im.CONTENT_ITEM_TYPE)
+                        .withValue(ContactsContract.CommonDataKinds.Im.DATA, im.account)
+                        .withValue(ContactsContract.CommonDataKinds.Im.PROTOCOL, imProtoInt(im.protocol)).build()
+
+                    contentResolver.applyBatch(ContactsContract.AUTHORITY, ops)
+                    null
+                } catch (e: Exception) { e.printStackTrace(); e.message ?: "Unknown error" }
             }
+            done(err)
         }
+    }
 
-        // 4. Insert Emails
-        for (i in 0 until binding.llEmailContainer.childCount) {
-            val view = binding.llEmailContainer.getChildAt(i)
-            val email = view.findViewById<EditText>(R.id.et_value).text.toString().trim()
-            if (email.isNotEmpty()) {
-                 val typeStr = view.findViewById<android.widget.Spinner>(R.id.spinner_type).selectedItem.toString()
-                 ops.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
-                    .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, rawContactInsertIndex)
-                    .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE)
-                    .withValue(ContactsContract.CommonDataKinds.Email.ADDRESS, email)
-                    .withValue(ContactsContract.CommonDataKinds.Email.TYPE, getEmailType(typeStr))
-                    .build())
+    // ── UPDATE ────────────────────────────────────────────────────────────────
+
+    private fun doUpdate(
+        contactId: String,
+        displayName: String, namePrefix: String, firstName: String, middleName: String,
+        lastName: String, nameSuffix: String, phoneticName: String, nickname: String,
+        phones: List<PhoneEntry>, emails: List<EmailEntry>,
+        jobTitle: String, department: String, company: String,
+        addresses: List<AddressEntry>, dates: List<DateEntry>,
+        rels: List<RelationshipEntry>, notes: String,
+        websites: List<String>, ims: List<ImEntry>
+    ) {
+        lifecycleScope.launch {
+            val err = withContext(Dispatchers.IO) {
+                try {
+                    val rawId = getRawId(contactId) ?: return@withContext "Could not find raw contact ID"
+                    val ops   = ArrayList<ContentProviderOperation>()
+
+                    fun delMime(mime: String) {
+                        ops += ContentProviderOperation.newDelete(ContactsContract.Data.CONTENT_URI)
+                            .withSelection(
+                                "${ContactsContract.Data.RAW_CONTACT_ID}=? AND ${ContactsContract.Data.MIMETYPE}=?",
+                                arrayOf(rawId, mime)
+                            ).build()
+                    }
+
+                    fun ins(mime: String, block: ContentProviderOperation.Builder.() -> Unit) {
+                        ops += ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                            .withValue(ContactsContract.Data.RAW_CONTACT_ID, rawId)
+                            .withValue(ContactsContract.Data.MIMETYPE, mime)
+                            .apply(block).build()
+                    }
+
+                    // Structured name
+                    delMime(ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE)
+                    ins(ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE) {
+                        withValue(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME, displayName)
+                        withValue(ContactsContract.CommonDataKinds.StructuredName.PREFIX, namePrefix)
+                        withValue(ContactsContract.CommonDataKinds.StructuredName.GIVEN_NAME, firstName)
+                        withValue(ContactsContract.CommonDataKinds.StructuredName.MIDDLE_NAME, middleName)
+                        withValue(ContactsContract.CommonDataKinds.StructuredName.FAMILY_NAME, lastName)
+                        withValue(ContactsContract.CommonDataKinds.StructuredName.SUFFIX, nameSuffix)
+                        withValue(ContactsContract.CommonDataKinds.StructuredName.PHONETIC_GIVEN_NAME, phoneticName)
+                    }
+
+                    // Nickname
+                    delMime(ContactsContract.CommonDataKinds.Nickname.CONTENT_ITEM_TYPE)
+                    if (nickname.isNotEmpty()) ins(ContactsContract.CommonDataKinds.Nickname.CONTENT_ITEM_TYPE) {
+                        withValue(ContactsContract.CommonDataKinds.Nickname.NAME, nickname)
+                    }
+
+                    // Phones
+                    delMime(ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+                    for (p in phones) ins(ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE) {
+                        withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, p.number)
+                        withValue(ContactsContract.CommonDataKinds.Phone.TYPE, phoneTypeInt(p.typeLabel))
+                        withValue(ContactsContract.CommonDataKinds.Phone.LABEL, p.typeLabel)
+                    }
+
+                    // Emails
+                    delMime(ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE)
+                    for (e in emails) ins(ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE) {
+                        withValue(ContactsContract.CommonDataKinds.Email.ADDRESS, e.address)
+                        withValue(ContactsContract.CommonDataKinds.Email.TYPE, emailTypeInt(e.typeLabel))
+                        withValue(ContactsContract.CommonDataKinds.Email.LABEL, e.typeLabel)
+                    }
+
+                    // Photo
+                    if (selectedImageBytes != null) {
+                        delMime(ContactsContract.CommonDataKinds.Photo.CONTENT_ITEM_TYPE)
+                        ins(ContactsContract.CommonDataKinds.Photo.CONTENT_ITEM_TYPE) {
+                            withValue(ContactsContract.CommonDataKinds.Photo.PHOTO, selectedImageBytes)
+                        }
+                    }
+
+                    // Organization
+                    delMime(ContactsContract.CommonDataKinds.Organization.CONTENT_ITEM_TYPE)
+                    if (jobTitle.isNotEmpty() || department.isNotEmpty() || company.isNotEmpty())
+                        ins(ContactsContract.CommonDataKinds.Organization.CONTENT_ITEM_TYPE) {
+                            withValue(ContactsContract.CommonDataKinds.Organization.TITLE, jobTitle)
+                            withValue(ContactsContract.CommonDataKinds.Organization.DEPARTMENT, department)
+                            withValue(ContactsContract.CommonDataKinds.Organization.COMPANY, company)
+                        }
+
+                    // Addresses
+                    delMime(ContactsContract.CommonDataKinds.StructuredPostal.CONTENT_ITEM_TYPE)
+                    for (a in addresses) ins(ContactsContract.CommonDataKinds.StructuredPostal.CONTENT_ITEM_TYPE) {
+                        withValue(ContactsContract.CommonDataKinds.StructuredPostal.TYPE, addrTypeInt(a.typeLabel))
+                        withValue(ContactsContract.CommonDataKinds.StructuredPostal.STREET, a.street)
+                        withValue(ContactsContract.CommonDataKinds.StructuredPostal.CITY, a.city)
+                        withValue(ContactsContract.CommonDataKinds.StructuredPostal.REGION, a.state)
+                        withValue(ContactsContract.CommonDataKinds.StructuredPostal.POSTCODE, a.postcode)
+                        withValue(ContactsContract.CommonDataKinds.StructuredPostal.COUNTRY, a.country)
+                    }
+
+                    // Dates
+                    delMime(ContactsContract.CommonDataKinds.Event.CONTENT_ITEM_TYPE)
+                    for (d in dates) ins(ContactsContract.CommonDataKinds.Event.CONTENT_ITEM_TYPE) {
+                        withValue(ContactsContract.CommonDataKinds.Event.TYPE, dateTypeInt(d.typeLabel))
+                        withValue(ContactsContract.CommonDataKinds.Event.START_DATE, "%04d-%02d-%02d".format(d.year, d.month, d.day))
+                    }
+
+                    // Relationships
+                    delMime(ContactsContract.CommonDataKinds.Relation.CONTENT_ITEM_TYPE)
+                    for (r in rels) ins(ContactsContract.CommonDataKinds.Relation.CONTENT_ITEM_TYPE) {
+                        withValue(ContactsContract.CommonDataKinds.Relation.NAME, r.name)
+                        withValue(ContactsContract.CommonDataKinds.Relation.TYPE, relTypeInt(r.typeLabel))
+                    }
+
+                    // Notes
+                    delMime(ContactsContract.CommonDataKinds.Note.CONTENT_ITEM_TYPE)
+                    if (notes.isNotEmpty()) ins(ContactsContract.CommonDataKinds.Note.CONTENT_ITEM_TYPE) {
+                        withValue(ContactsContract.CommonDataKinds.Note.NOTE, notes)
+                    }
+
+                    // Websites
+                    delMime(ContactsContract.CommonDataKinds.Website.CONTENT_ITEM_TYPE)
+                    for (w in websites) ins(ContactsContract.CommonDataKinds.Website.CONTENT_ITEM_TYPE) {
+                        withValue(ContactsContract.CommonDataKinds.Website.URL, w)
+                    }
+
+                    // IM
+                    delMime(ContactsContract.CommonDataKinds.Im.CONTENT_ITEM_TYPE)
+                    for (im in ims) ins(ContactsContract.CommonDataKinds.Im.CONTENT_ITEM_TYPE) {
+                        withValue(ContactsContract.CommonDataKinds.Im.DATA, im.account)
+                        withValue(ContactsContract.CommonDataKinds.Im.PROTOCOL, imProtoInt(im.protocol))
+                    }
+
+                    contentResolver.applyBatch(ContactsContract.AUTHORITY, ops)
+                    null
+                } catch (e: Exception) { e.printStackTrace(); e.message ?: "Unknown error" }
             }
+            done(err)
         }
+    }
 
-        // 5. Insert Photo
-        photoBitmap?.let { bitmap ->
-            val stream = ByteArrayOutputStream()
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
-            ops.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
-                .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, rawContactInsertIndex)
-                .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Photo.CONTENT_ITEM_TYPE)
-                .withValue(ContactsContract.CommonDataKinds.Photo.PHOTO, stream.toByteArray())
-                .build())
-        }
+    // ── Helpers ───────────────────────────────────────────────────────────────
 
-        // 6. Group
-        selectedGroupId?.let { groupId ->
-             ops.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
-                .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, rawContactInsertIndex)
-                .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.GroupMembership.CONTENT_ITEM_TYPE)
-                .withValue(ContactsContract.CommonDataKinds.GroupMembership.GROUP_ROW_ID, groupId)
-                .build())
-        }
-
-        // 7. Address
-        for (i in 0 until binding.llAddressContainer.childCount) {
-            val view = binding.llAddressContainer.getChildAt(i)
-            val street = view.findViewById<EditText>(R.id.et_street).text.toString().trim()
-            val city = view.findViewById<EditText>(R.id.et_city).text.toString().trim()
-            val postcode = view.findViewById<EditText>(R.id.et_postcode).text.toString().trim()
-            
-            if (street.isNotEmpty() || city.isNotEmpty() || postcode.isNotEmpty()) {
-                 val typeStr = view.findViewById<android.widget.Spinner>(R.id.spinner_type).selectedItem.toString()
-                 // Map typeStr to TYPE
-                 val type = when(typeStr) { "Work" -> ContactsContract.CommonDataKinds.StructuredPostal.TYPE_WORK ; "Other" -> ContactsContract.CommonDataKinds.StructuredPostal.TYPE_OTHER; else -> ContactsContract.CommonDataKinds.StructuredPostal.TYPE_HOME }
-                 
-                 ops.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
-                    .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, rawContactInsertIndex)
-                    .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.StructuredPostal.CONTENT_ITEM_TYPE)
-                    .withValue(ContactsContract.CommonDataKinds.StructuredPostal.STREET, street)
-                    .withValue(ContactsContract.CommonDataKinds.StructuredPostal.CITY, city)
-                    .withValue(ContactsContract.CommonDataKinds.StructuredPostal.POSTCODE, postcode)
-                    .withValue(ContactsContract.CommonDataKinds.StructuredPostal.TYPE, type)
-                    .build())
-            }
-        }
-
-        // 8. Work Info (Static)
-        val company = binding.etCompany.text.toString().trim()
-        val title = binding.etJobTitle.text.toString().trim()
-        if (company.isNotEmpty() || title.isNotEmpty()) {
-             ops.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
-                .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, rawContactInsertIndex)
-                .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Organization.CONTENT_ITEM_TYPE)
-                .withValue(ContactsContract.CommonDataKinds.Organization.COMPANY, company)
-                .withValue(ContactsContract.CommonDataKinds.Organization.TITLE, title)
-                .withValue(ContactsContract.CommonDataKinds.Organization.TYPE, ContactsContract.CommonDataKinds.Organization.TYPE_WORK)
-                .build())
-        }
-
-        // 9. Dates
-        for (i in 0 until binding.llDateContainer.childCount) {
-            val view = binding.llDateContainer.getChildAt(i)
-            val date = view.findViewById<android.widget.TextView>(R.id.tv_date).text.toString()
-            if (date != "Select Date" && date.isNotEmpty()) {
-                 val typeStr = view.findViewById<android.widget.Spinner>(R.id.spinner_type).selectedItem.toString()
-                 val type = when(typeStr) { "Anniversary" -> ContactsContract.CommonDataKinds.Event.TYPE_ANNIVERSARY; "Other" -> ContactsContract.CommonDataKinds.Event.TYPE_OTHER; else -> ContactsContract.CommonDataKinds.Event.TYPE_BIRTHDAY }
-                 
-                 ops.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
-                    .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, rawContactInsertIndex)
-                    .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Event.CONTENT_ITEM_TYPE)
-                    .withValue(ContactsContract.CommonDataKinds.Event.START_DATE, date)
-                    .withValue(ContactsContract.CommonDataKinds.Event.TYPE, type)
-                    .build())
-            }
-        }
-
-        // 10. Note
-        val note = binding.etNote.text.toString().trim()
-        if (note.isNotEmpty()) {
-             ops.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
-                .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, rawContactInsertIndex)
-                .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Note.CONTENT_ITEM_TYPE)
-                .withValue(ContactsContract.CommonDataKinds.Note.NOTE, note)
-                .build())
-        }
-
-        // 11. Website
-        for (i in 0 until binding.llWebsiteContainer.childCount) {
-            val view = binding.llWebsiteContainer.getChildAt(i)
-            val url = view.findViewById<EditText>(R.id.et_value).text.toString().trim()
-            if (url.isNotEmpty()) {
-                ops.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
-                .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, rawContactInsertIndex)
-                .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Website.CONTENT_ITEM_TYPE)
-                .withValue(ContactsContract.CommonDataKinds.Website.URL, url)
-                .withValue(ContactsContract.CommonDataKinds.Website.TYPE, ContactsContract.CommonDataKinds.Website.TYPE_HOMEPAGE)
-                .build())
-            }
-        }
-        
-        // 12. Messenger
-        for (i in 0 until binding.llMessengerContainer.childCount) {
-            val view = binding.llMessengerContainer.getChildAt(i)
-            val im = view.findViewById<EditText>(R.id.et_value).text.toString().trim()
-            if (im.isNotEmpty()) {
-                 val typeStr = view.findViewById<android.widget.Spinner>(R.id.spinner_type).selectedItem.toString()
-                 ops.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
-                .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, rawContactInsertIndex)
-                .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Im.CONTENT_ITEM_TYPE)
-                .withValue(ContactsContract.CommonDataKinds.Im.DATA, im)
-                .withValue(ContactsContract.CommonDataKinds.Im.PROTOCOL, ContactsContract.CommonDataKinds.Im.PROTOCOL_CUSTOM)
-                 .withValue(ContactsContract.CommonDataKinds.Im.CUSTOM_PROTOCOL, typeStr)
-                .build())
-            }
-        }
-
-         // 13. Nickname (Static)
-        val nickname = binding.etNickname.text.toString().trim()
-        if (nickname.isNotEmpty()) {
-             ops.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
-                .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, rawContactInsertIndex)
-                .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Nickname.CONTENT_ITEM_TYPE)
-                .withValue(ContactsContract.CommonDataKinds.Nickname.NAME, nickname)
-                .withValue(ContactsContract.CommonDataKinds.Nickname.TYPE, ContactsContract.CommonDataKinds.Nickname.TYPE_DEFAULT)
-                .build())
-        }
-        
-        // 14. Relations
-         for (i in 0 until binding.llRelationContainer.childCount) {
-            val view = binding.llRelationContainer.getChildAt(i)
-            val name = view.findViewById<EditText>(R.id.et_value).text.toString().trim()
-            if (name.isNotEmpty()) {
-                 val typeStr = view.findViewById<android.widget.Spinner>(R.id.spinner_type).selectedItem.toString()
-                  // Simplified type mapping or store as custom if needed, here just saving generic type
-                 ops.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
-                .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, rawContactInsertIndex)
-                .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Relation.CONTENT_ITEM_TYPE)
-                .withValue(ContactsContract.CommonDataKinds.Relation.NAME, name)
-                .withValue(ContactsContract.CommonDataKinds.Relation.TYPE, ContactsContract.CommonDataKinds.Relation.TYPE_CUSTOM)
-                 .withValue(ContactsContract.CommonDataKinds.Relation.LABEL, typeStr)
-                .build())
-            }
-        }
-
-        try {
-            contentResolver.applyBatch(ContactsContract.AUTHORITY, ops)
-            Toast.makeText(this, "Contact saved successfully", Toast.LENGTH_SHORT).show()
+    private fun done(error: String?) {
+        b.btnSave.isEnabled = true
+        b.progressSave.visibility = View.GONE
+        if (error == null) {
+            Toast.makeText(this, if (existingContact != null) "Contact updated" else "Contact saved", Toast.LENGTH_SHORT).show()
+            setResult(Activity.RESULT_OK)
             finish()
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Toast.makeText(this, "Error saving contact: ${e.message}", Toast.LENGTH_LONG).show()
+        } else {
+            Toast.makeText(this, "Failed: $error", Toast.LENGTH_LONG).show()
         }
     }
 
-    private fun getPhoneType(type: String): Int {
-        return when (type) {
-            "Mobile" -> ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE
-            "Work" -> ContactsContract.CommonDataKinds.Phone.TYPE_WORK
-            "Home" -> ContactsContract.CommonDataKinds.Phone.TYPE_HOME
-            "Main" -> ContactsContract.CommonDataKinds.Phone.TYPE_MAIN
-            "Fax" -> ContactsContract.CommonDataKinds.Phone.TYPE_FAX_WORK
-            else -> ContactsContract.CommonDataKinds.Phone.TYPE_OTHER
+    private fun getRawId(contactId: String): String? = try {
+        contentResolver.query(
+            ContactsContract.RawContacts.CONTENT_URI,
+            arrayOf(ContactsContract.RawContacts._ID),
+            "${ContactsContract.RawContacts.CONTACT_ID}=? AND ${ContactsContract.RawContacts.DELETED}=0",
+            arrayOf(contactId), null
+        )?.use { if (it.moveToFirst()) it.getString(0) else null }
+    } catch (e: Exception) { e.printStackTrace(); null }
+
+    private fun uriToBytes(uri: Uri): ByteArray? = try {
+        contentResolver.openInputStream(uri)?.use { 
+            val buffer = ByteArrayOutputStream()
+            it.copyTo(buffer)
+            buffer.toByteArray()
         }
+    } catch (e: Exception) { e.printStackTrace(); null }
+
+
+    private fun inflate(res: Int): View = LayoutInflater.from(this).inflate(res, null, false)
+    private fun remove(v: View, c: LinearLayout, l: MutableList<View>) { c.removeView(v); l.remove(v) }
+    private fun pick(opts: Array<String>, tv: TextView) = AlertDialog.Builder(this).setItems(opts) { _, i -> tv.text = opts[i] }.show()
+    private fun fmtDate(y: Int, m: Int, d: Int): String {
+        val months = arrayOf("","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")
+        return if (y > 0) "${months.getOrElse(m){"?"}} $d, $y" else "${months.getOrElse(m){"?"}} $d"
     }
 
-     private fun getEmailType(type: String): Int {
-        return when (type) {
-            "Home" -> ContactsContract.CommonDataKinds.Email.TYPE_HOME
-            "Work" -> ContactsContract.CommonDataKinds.Email.TYPE_WORK
-            "Mobile" -> ContactsContract.CommonDataKinds.Email.TYPE_MOBILE
-            else -> ContactsContract.CommonDataKinds.Email.TYPE_OTHER
-        }
+    private operator fun ArrayList<ContentProviderOperation>.plusAssign(op: ContentProviderOperation) { add(op) }
+    private fun op(block: () -> ContentProviderOperation) = block()
+    private fun <T : View> View.find(id: Int): T = findViewById(id)
+
+    // ── Type → Int ────────────────────────────────────────────────────────────
+    private fun phoneTypeInt(l: String) = when(l) {
+        "Mobile" -> ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE
+        "Home"   -> ContactsContract.CommonDataKinds.Phone.TYPE_HOME
+        "Work"   -> ContactsContract.CommonDataKinds.Phone.TYPE_WORK
+        "Main"   -> ContactsContract.CommonDataKinds.Phone.TYPE_MAIN
+        "Work Fax"->ContactsContract.CommonDataKinds.Phone.TYPE_FAX_WORK
+        "Home Fax"->ContactsContract.CommonDataKinds.Phone.TYPE_FAX_HOME
+        "Pager"  -> ContactsContract.CommonDataKinds.Phone.TYPE_PAGER
+        else     -> ContactsContract.CommonDataKinds.Phone.TYPE_OTHER
+    }
+    private fun emailTypeInt(l: String) = when(l) {
+        "Work"  -> ContactsContract.CommonDataKinds.Email.TYPE_WORK
+        "Other" -> ContactsContract.CommonDataKinds.Email.TYPE_OTHER
+        else    -> ContactsContract.CommonDataKinds.Email.TYPE_HOME
+    }
+    private fun addrTypeInt(l: String) = when(l) {
+        "Work"  -> ContactsContract.CommonDataKinds.StructuredPostal.TYPE_WORK
+        "Other" -> ContactsContract.CommonDataKinds.StructuredPostal.TYPE_OTHER
+        else    -> ContactsContract.CommonDataKinds.StructuredPostal.TYPE_HOME
+    }
+    private fun dateTypeInt(l: String) = when(l) {
+        "Anniversary" -> ContactsContract.CommonDataKinds.Event.TYPE_ANNIVERSARY
+        "Other"       -> ContactsContract.CommonDataKinds.Event.TYPE_OTHER
+        else          -> ContactsContract.CommonDataKinds.Event.TYPE_BIRTHDAY
+    }
+    private fun relTypeInt(l: String) = when(l) {
+        "Mother"   -> ContactsContract.CommonDataKinds.Relation.TYPE_MOTHER
+        "Father"   -> ContactsContract.CommonDataKinds.Relation.TYPE_FATHER
+        "Brother"  -> ContactsContract.CommonDataKinds.Relation.TYPE_BROTHER
+        "Sister"   -> ContactsContract.CommonDataKinds.Relation.TYPE_SISTER
+        "Spouse"   -> ContactsContract.CommonDataKinds.Relation.TYPE_SPOUSE
+        "Child"    -> ContactsContract.CommonDataKinds.Relation.TYPE_CHILD
+        "Friend"   -> ContactsContract.CommonDataKinds.Relation.TYPE_FRIEND
+        "Relative" -> ContactsContract.CommonDataKinds.Relation.TYPE_RELATIVE
+        else       -> ContactsContract.CommonDataKinds.Relation.TYPE_PARENT
+    }
+    private fun imProtoInt(l: String) = when(l) {
+        "Hangouts"   -> ContactsContract.CommonDataKinds.Im.PROTOCOL_GOOGLE_TALK
+        "QQ"         -> ContactsContract.CommonDataKinds.Im.PROTOCOL_QQ
+        "Skype"      -> ContactsContract.CommonDataKinds.Im.PROTOCOL_SKYPE
+        "Yahoo"      -> ContactsContract.CommonDataKinds.Im.PROTOCOL_YAHOO
+        "AIM"        -> ContactsContract.CommonDataKinds.Im.PROTOCOL_AIM
+        "MSN"        -> ContactsContract.CommonDataKinds.Im.PROTOCOL_MSN
+        "ICQ"        -> ContactsContract.CommonDataKinds.Im.PROTOCOL_ICQ
+        "Jabber"     -> ContactsContract.CommonDataKinds.Im.PROTOCOL_JABBER
+        "NetMeeting" -> ContactsContract.CommonDataKinds.Im.PROTOCOL_NETMEETING
+        else         -> ContactsContract.CommonDataKinds.Im.PROTOCOL_CUSTOM
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == android.R.id.home) { finish(); return true }
+        return super.onOptionsItemSelected(item)
     }
 }

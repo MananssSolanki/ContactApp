@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:id="@+id/root_layout">
 
@@ -15,6 +16,27 @@
         android:paddingTop="@dimen/_12sdp"
         android:paddingBottom="@dimen/_12sdp"
         android:gravity="center_vertical">
+
+        <!-- Contact Photo -->
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/iv_contact_photo"
+            android:layout_width="@dimen/_40sdp"
+            android:layout_height="@dimen/_40sdp"
+            android:layout_marginEnd="@dimen/_12sdp"
+            android:src="@drawable/ic_launcher_foreground"
+            android:scaleType="centerCrop"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.MaterialComponents.SmallComponent"
+            android:visibility="visible"/>
+
+        <!-- Multi-select Checkbox -->
+        <CheckBox
+            android:id="@+id/cb_select"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/_8sdp"
+            android:visibility="gone"
+            android:clickable="false"
+            android:focusable="false"/>
 
         <!-- Call Type Icon -->
         <ImageView

@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="@dimen/_8sdp"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/_8sdp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tvAddressType"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:drawableEnd="@android:drawable/arrow_down_float"
+            android:drawableTint="#1E90FF"
+            android:text="Home"
+            android:textColor="#1E90FF"
+            android:textSize="@dimen/_14ssp" />
+
+        <ImageButton
+            android:id="@+id/btnRemoveAddress"
+            android:layout_width="@dimen/_32sdp"
+            android:layout_height="@dimen/_32sdp"
+            android:background="@android:color/transparent"
+            android:contentDescription="Remove address"
+            android:src="@android:drawable/ic_delete"
+            android:tint="#FF4444" />
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/etStreet"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/_8sdp"
+        android:background="@android:color/transparent"
+        android:hint="Street"
+        android:textColor="#333333"
+        android:textColorHint="#aaaaaa"
+        android:textSize="@dimen/_15ssp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginBottom="@dimen/_8sdp"
+        android:background="#ddd" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/etCity"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/_8sdp"
+            android:layout_weight="1"
+            android:background="@android:color/transparent"
+            android:hint="City"
+            android:textColor="#333333"
+            android:textColorHint="#aaaaaa"
+            android:textSize="@dimen/_15ssp" />
+
+        <ImageView
+            android:layout_width="@dimen/_24sdp"
+            android:layout_height="@dimen/_24sdp"
+            android:alpha="0.4"
+            android:contentDescription="expand city"
+            android:src="@android:drawable/arrow_down_float" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginVertical="@dimen/_8sdp"
+        android:background="#ddd" />
+
+    <EditText
+        android:id="@+id/etState"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/_8sdp"
+        android:background="@android:color/transparent"
+        android:hint="State"
+        android:textColor="#333333"
+        android:textColorHint="#aaaaaa"
+        android:textSize="@dimen/_15ssp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginBottom="@dimen/_8sdp"
+        android:background="#ddd" />
+
+    <EditText
+        android:id="@+id/etPostcode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/_8sdp"
+        android:background="@android:color/transparent"
+        android:hint="Postcode"
+        android:textColor="#333333"
+        android:textColorHint="#aaaaaa"
+        android:textSize="@dimen/_15ssp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginBottom="@dimen/_8sdp"
+        android:background="#ddd" />
+
+    <EditText
+        android:id="@+id/etCountry"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:hint="Country"
+        android:textColor="#333333"
+        android:textColorHint="#aaaaaa"
+        android:textSize="@dimen/_15ssp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:background="#ddd" />
+</LinearLayout>

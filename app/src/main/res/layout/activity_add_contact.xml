@@ -1,699 +1,581 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white"
-    android:orientation="vertical"
-    tools:context=".Activities.AddContactActivity">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="#FFFFFF"
+    android:fillViewport="true">
 
-    <!-- Header / Toolbar -->
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/_50sdp"
-        android:paddingStart="@dimen/_16sdp"
-        android:paddingEnd="@dimen/_16sdp">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/_32sdp">
 
-        <TextView
-            android:id="@+id/btn_cancel"
-            android:layout_width="wrap_content"
+        <!-- ══ Account Selection Row ══ -->
+        <LinearLayout
+            android:id="@+id/layoutAccount"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:text="Cancel"
-            android:textColor="@android:color/black"
-            android:textSize="@dimen/_14ssp" />
+            android:orientation="horizontal"
+            android:padding="@dimen/_12sdp"
+            android:gravity="center_vertical"
+            android:background="?attr/selectableItemBackground"
+            android:layout_marginBottom="@dimen/_8sdp">
 
-        <TextView
-            android:id="@+id/tv_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:text="Create contact"
-            android:textColor="@android:color/black"
-            android:textSize="@dimen/_14ssp"
-            android:textStyle="bold"
-            android:visibility="gone" />
+            <ImageView
+                android:id="@+id/ivAccountIcon"
+                android:layout_width="@dimen/_24sdp"
+                android:layout_height="@dimen/_24sdp"
+                android:src="@drawable/ic_call"
+                android:contentDescription="Account type" />
 
-        <CheckBox
-            android:id="@+id/cb_favorite"
-            android:layout_width="@dimen/_24sdp"
-            android:layout_height="@dimen/_24sdp"
-            android:layout_centerVertical="true"
-            android:layout_marginEnd="@dimen/_16sdp"
-            android:layout_toStartOf="@id/btn_save"
-            android:button="@android:drawable/star_on"
-            android:buttonTint="@color/black" />
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginStart="@dimen/_12sdp">
 
-        <TextView
-            android:id="@+id/btn_save"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:text="Save"
-            android:textColor="@android:color/black"
-            android:textSize="@dimen/_14ssp"
-            android:textStyle="bold" />
-    </RelativeLayout>
+                <TextView
+                    android:id="@+id/tvAccountName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Google"
+                    android:textColor="#333333"
+                    android:textSize="@dimen/_14ssp"
+                    android:textStyle="bold" />
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+                <TextView
+                    android:id="@+id/tvAccountEmail"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="solankimanan19@gmail.com"
+                    android:textColor="#666666"
+                    android:textSize="@dimen/_11ssp" />
+            </LinearLayout>
 
+            <ImageView
+                android:id="@+id/ivAccountArrow"
+                android:layout_width="@dimen/_18sdp"
+                android:layout_height="@dimen/_18sdp"
+                android:src="@android:drawable/arrow_down_float"
+                app:tint="#888888"
+                android:contentDescription="select account" />
+        </LinearLayout>
+
+        <!-- ══ Avatar ══ -->
+        <FrameLayout
+            android:layout_width="@dimen/_88sdp"
+            android:layout_height="@dimen/_88sdp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="@dimen/_24sdp"
+            android:layout_marginBottom="@dimen/_20sdp">
+            <ImageView
+                android:id="@+id/ivAvatar"
+                android:layout_width="@dimen/_80sdp"
+                android:layout_height="@dimen/_80sdp"
+                android:src="@drawable/ic_launcher_foreground"
+                android:scaleType="centerCrop"
+                android:background="@drawable/circle_background"
+                android:clipToOutline="true"
+                android:layout_marginBottom="@dimen/_16sdp"/>
+        </FrameLayout>
+
+        <!-- ══════════════════════════════════════════
+             NAME SECTION
+        ══════════════════════════════════════════ -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingBottom="@dimen/_32sdp">
+            android:background="#F5F5F5"
+            android:layout_marginHorizontal="@dimen/_12sdp"
+            android:layout_marginBottom="@dimen/_8sdp"
+            android:padding="@dimen/_16sdp">
 
-            <!-- Account Selector -->
+            <!-- Display name row with expand arrow -->
             <LinearLayout
-                android:id="@+id/layout_account_spinner"
+                android:id="@+id/layoutNameExpand"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="?attr/selectableItemBackground"
-                android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:padding="@dimen/_12sdp">
+                android:gravity="center_vertical">
 
                 <ImageView
-                    android:id="@+id/iv_account_icon"
-                    android:layout_width="@dimen/_20sdp"
-                    android:layout_height="@dimen/_20sdp"
-                    android:src="@drawable/ic_launcher_foreground"
-                    app:tint="@android:color/black"
-                    tools:src="@tools:sample/avatars" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/_12sdp"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <Spinner
-                        android:id="@+id/spinner_accounts"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="@null"
-                        android:minHeight="@dimen/_30sdp" />
-
-                    <!-- Fallback Textview if custom spinner logic is used -->
-                </LinearLayout>
-
-                <ImageView
-                    android:layout_width="@dimen/_12sdp"
-                    android:layout_height="@dimen/_12sdp"
-                    android:src="@android:drawable/arrow_down_float"
-                    app:tint="@android:color/black" />
-
-            </LinearLayout>
-
-            <!-- Photo Picker -->
-            <FrameLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="@dimen/_24sdp"
-                android:layout_marginBottom="@dimen/_24sdp">
-
-                <ImageView
-                    android:id="@+id/iv_contact_photo"
-                    android:layout_width="@dimen/_100sdp"
-                    android:layout_height="@dimen/_100sdp"
-                    android:src="@drawable/circle_background"
-                    app:tint="#E0E0E0" />
-
-                <ImageView
-                    android:layout_width="@dimen/_40sdp"
-                    android:layout_height="@dimen/_40sdp"
-                    android:layout_gravity="center"
-                    android:src="@android:drawable/ic_menu_camera"
-                    app:tint="@android:color/darker_gray" />
-
-            </FrameLayout>
-
-            <!-- Name Input -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/_16sdp"
-                android:orientation="horizontal"
-                android:paddingStart="@dimen/_16sdp"
-                android:paddingEnd="@dimen/_16sdp">
-
-                <ImageView
-                    android:layout_width="@dimen/_20sdp"
-                    android:layout_height="@dimen/_20sdp"
-                    android:layout_marginTop="@dimen/_12sdp"
+                    android:layout_width="@dimen/_24sdp"
+                    android:layout_height="@dimen/_24sdp"
                     android:src="@android:drawable/ic_menu_myplaces"
-                    app:tint="@android:color/black" />
+                    app:tint="#666666"
+                    android:contentDescription="name" />
 
-                <LinearLayout
+                <EditText
+                    android:id="@+id/etDisplayName"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/_16sdp"
                     android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="Name"
-                        app:boxBackgroundMode="none"
-                        app:hintTextColor="#757575">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/et_name"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:background="@null"
-                            android:inputType="textPersonName|textCapWords"
-                            android:textColor="@android:color/black"
-                            android:textSize="@dimen/_14ssp" />
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="@dimen/_1sdp"
-                        android:background="#E0E0E0" />
-
-                </LinearLayout>
+                    android:layout_marginStart="@dimen/_12sdp"
+                    android:hint="Name"
+                    android:textColorHint="#aaaaaa"
+                    android:textColor="#333333"
+                    android:background="@android:color/transparent"
+                    android:textSize="@dimen/_16ssp"
+                    android:inputType="textPersonName"
+                    android:imeOptions="actionNext" />
 
                 <ImageView
-                    android:id="@+id/btn_expand_name"
-                    android:layout_width="@dimen/_20sdp"
-                    android:layout_height="@dimen/_20sdp"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginStart="@dimen/_8sdp"
-                    android:src="@android:drawable/arrow_down_float"
-                    app:tint="@android:color/black" />
-
+                    android:id="@+id/ivNameArrow"
+                    android:layout_width="@dimen/_24sdp"
+                    android:layout_height="@dimen/_24sdp"
+                    android:src="@android:drawable/arrow_up_float"
+                    app:tint="#666666"
+                    android:contentDescription="expand" />
             </LinearLayout>
 
-            <!-- Hidden Name Fields (First, Last, etc) -->
+            <!-- Expanded name fields -->
             <LinearLayout
-                android:id="@+id/layout_more_name_fields"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingStart="@dimen/_52sdp"
-                android:paddingEnd="@dimen/_16sdp"
-                android:visibility="gone">
-
-                <!-- First Name -->
-                <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="First name"
-                    app:boxBackgroundMode="none"
-                    app:hintTextColor="#757575">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/et_first_name"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="@null"
-                        android:inputType="textPersonName|textCapWords"
-                        android:textColor="@android:color/black" />
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="#E0E0E0" />
-
-                <!-- Last Name -->
-                <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Last name"
-                    app:boxBackgroundMode="none"
-                    app:hintTextColor="#757575">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/et_last_name"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="@null"
-                        android:inputType="textPersonName|textCapWords"
-                        android:textColor="@android:color/black" />
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="#E0E0E0" />
-
-            </LinearLayout>
-
-            <!-- Phone Sections -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginTop="@dimen/_16sdp">
-
-                <LinearLayout
-                    android:id="@+id/ll_phone_container"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"/>
-
-                <TextView
-                    android:id="@+id/tv_add_phone"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/_52sdp"
-                    android:layout_marginTop="@dimen/_8sdp"
-                    android:text="Add phone number"
-                    android:textColor="#4CAF50"
-                    android:textSize="@dimen/_12ssp"
-                    android:textStyle="bold"
-                    android:padding="@dimen/_8sdp"
-                    app:drawableStartCompat="@android:drawable/ic_input_add"
-                    app:drawableTint="#4CAF50"
-                    android:drawablePadding="@dimen/_8sdp"
-                    android:background="?attr/selectableItemBackground"/>
-            </LinearLayout>
-
-            <!-- Email Sections -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginTop="@dimen/_16sdp">
-
-                <LinearLayout
-                    android:id="@+id/ll_email_container"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"/>
-
-                <TextView
-                    android:id="@+id/tv_add_email"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/_52sdp"
-                    android:layout_marginTop="@dimen/_8sdp"
-                    android:text="Add email"
-                    android:textColor="#4CAF50"
-                    android:textSize="@dimen/_12ssp"
-                    android:textStyle="bold"
-                    android:padding="@dimen/_8sdp"
-                    app:drawableStartCompat="@android:drawable/ic_input_add"
-                    app:drawableTint="#4CAF50"
-                    android:drawablePadding="@dimen/_8sdp"
-                    android:background="?attr/selectableItemBackground"/>
-            </LinearLayout>
-
-            <!-- View More / Expandable Sections -->
-            <TextView
-                android:id="@+id/tv_view_more"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/_16sdp"
-                android:gravity="center"
-                android:padding="@dimen/_16sdp"
-                android:text="View more"
-                android:textColor="#2196F3"
-                android:textSize="@dimen/_14ssp" />
-
-            <LinearLayout
-                android:id="@+id/layout_more_fields"
+                android:id="@+id/expandedNameFields"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:visibility="gone">
 
-                <!-- Address Sections -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                <View android:layout_width="match_parent" android:layout_height="1dp"
+                    android:background="#ddd" android:layout_marginVertical="@dimen/_8sdp" />
 
-                    <LinearLayout
-                        android:id="@+id/ll_address_container"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"/>
+                <EditText android:id="@+id/etNamePrefix"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:hint="Name prefix" android:textColorHint="#aaaaaa"
+                    android:textColor="#333333" android:background="@android:color/transparent"
+                    android:textSize="@dimen/_15ssp" android:inputType="textPersonName"
+                    android:layout_marginBottom="@dimen/_12sdp"/>
 
-                    <TextView
-                        android:id="@+id/tv_add_address"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/_52sdp"
-                        android:layout_marginTop="@dimen/_8sdp"
-                        android:text="Add address"
-                        android:textColor="#4CAF50"
-                        android:textSize="@dimen/_12ssp"
-                        android:textStyle="bold"
-                        android:padding="@dimen/_8sdp"
-                        app:drawableStartCompat="@android:drawable/ic_input_add"
-                        app:drawableTint="#4CAF50"
-                        android:drawablePadding="@dimen/_8sdp"
-                        android:background="?attr/selectableItemBackground"/>
-                </LinearLayout>
+                <EditText android:id="@+id/etFirstName"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:hint="First name" android:textColorHint="#aaaaaa"
+                    android:textColor="#333333" android:background="@android:color/transparent"
+                    android:textSize="@dimen/_15ssp" android:inputType="textPersonName"
+                    android:layout_marginBottom="@dimen/_12sdp"/>
 
-                <!-- Important Dates -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginTop="@dimen/_16sdp">
+                <EditText android:id="@+id/etMiddleName"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:hint="Middle name" android:textColorHint="#aaaaaa"
+                    android:textColor="#333333" android:background="@android:color/transparent"
+                    android:textSize="@dimen/_15ssp" android:inputType="textPersonName"
+                    android:layout_marginBottom="@dimen/_12sdp"/>
 
-                    <LinearLayout
-                        android:id="@+id/ll_date_container"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"/>
+                <EditText android:id="@+id/etLastName"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:hint="Last name" android:textColorHint="#aaaaaa"
+                    android:textColor="#333333" android:background="@android:color/transparent"
+                    android:textSize="@dimen/_15ssp" android:inputType="textPersonName"
+                    android:layout_marginBottom="@dimen/_12sdp"/>
 
-                    <TextView
-                        android:id="@+id/tv_add_date"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/_52sdp"
-                        android:layout_marginTop="@dimen/_8sdp"
-                        android:text="Add important date"
-                        android:textColor="#4CAF50"
-                        android:textSize="@dimen/_12ssp"
-                        android:textStyle="bold"
-                        android:padding="@dimen/_8sdp"
-                        app:drawableStartCompat="@android:drawable/ic_input_add"
-                        app:drawableTint="#4CAF50"
-                        android:drawablePadding="@dimen/_8sdp"
-                        android:background="?attr/selectableItemBackground"/>
-                </LinearLayout>
-
-                <!-- Work Info (Keep Static for now as usually single) -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/_16sdp"
-                    android:orientation="horizontal"
-                    android:paddingStart="@dimen/_16sdp"
-                    android:paddingEnd="@dimen/_16sdp">
-
-                    <ImageView
-                        android:layout_width="@dimen/_20sdp"
-                        android:layout_height="@dimen/_20sdp"
-                        android:layout_marginTop="@dimen/_12sdp"
-                        android:src="@android:drawable/ic_menu_sort_by_size"
-                        app:tint="@android:color/black" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/_16sdp"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <com.google.android.material.textfield.TextInputLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:hint="Company"
-                            app:boxBackgroundMode="none"
-                            app:hintTextColor="#757575">
-
-                            <com.google.android.material.textfield.TextInputEditText
-                                android:id="@+id/et_company"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:background="@null"
-                                android:inputType="text"
-                                android:textColor="@android:color/black"
-                                android:textSize="@dimen/_14ssp" />
-                        </com.google.android.material.textfield.TextInputLayout>
-
-                        <View
-                            android:layout_width="match_parent"
-                            android:layout_height="@dimen/_1sdp"
-                            android:background="#E0E0E0" />
-
-                        <com.google.android.material.textfield.TextInputLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:hint="Title"
-                            app:boxBackgroundMode="none"
-                            app:hintTextColor="#757575">
-
-                            <com.google.android.material.textfield.TextInputEditText
-                                android:id="@+id/et_job_title"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:background="@null"
-                                android:inputType="text"
-                                android:textColor="@android:color/black"
-                                android:textSize="@dimen/_14ssp" />
-                        </com.google.android.material.textfield.TextInputLayout>
-
-                        <View
-                            android:layout_width="match_parent"
-                            android:layout_height="@dimen/_1sdp"
-                            android:background="#E0E0E0" />
-
-                    </LinearLayout>
-                </LinearLayout>
-
-                <!-- Groups -->
-                <LinearLayout
-                    android:id="@+id/layout_groups"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/_16sdp"
-                    android:background="?attr/selectableItemBackground"
-                    android:orientation="horizontal"
-                    android:paddingStart="@dimen/_16sdp"
-                    android:paddingEnd="@dimen/_16sdp">
-
-                    <ImageView
-                        android:layout_width="@dimen/_20sdp"
-                        android:layout_height="@dimen/_20sdp"
-                        android:layout_marginTop="@dimen/_12sdp"
-                        android:src="@android:drawable/ic_menu_agenda"
-                        app:tint="@android:color/black" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/_16sdp"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/_8sdp"
-                            android:text="Groups"
-                            android:textColor="#757575"
-                            android:textSize="@dimen/_12ssp" />
-
-                        <TextView
-                            android:id="@+id/tv_group_name"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:paddingTop="@dimen/_4sdp"
-                            android:paddingBottom="@dimen/_4sdp"
-                            android:text="Not assigned"
-                            android:textColor="@android:color/black"
-                            android:textSize="@dimen/_14ssp" />
-
-                        <View
-                            android:layout_width="match_parent"
-                            android:layout_height="@dimen/_1sdp"
-                            android:background="#E0E0E0" />
-                    </LinearLayout>
-                </LinearLayout>
-
-                <!-- Website Sections -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginTop="@dimen/_16sdp">
-
-                    <LinearLayout
-                        android:id="@+id/ll_website_container"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"/>
-
-                    <TextView
-                        android:id="@+id/tv_add_website"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/_52sdp"
-                        android:layout_marginTop="@dimen/_8sdp"
-                        android:text="Add website"
-                        android:textColor="#4CAF50"
-                        android:textSize="@dimen/_12ssp"
-                        android:textStyle="bold"
-                        android:padding="@dimen/_8sdp"
-                        app:drawableStartCompat="@android:drawable/ic_input_add"
-                        app:drawableTint="#4CAF50"
-                        android:drawablePadding="@dimen/_8sdp"
-                        android:background="?attr/selectableItemBackground"/>
-                </LinearLayout>
-
-                <!-- Notes -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/_16sdp"
-                    android:orientation="horizontal"
-                    android:paddingStart="@dimen/_16sdp"
-                    android:paddingEnd="@dimen/_16sdp">
-
-                    <ImageView
-                        android:layout_width="@dimen/_20sdp"
-                        android:layout_height="@dimen/_20sdp"
-                        android:layout_marginTop="@dimen/_12sdp"
-                        android:src="@android:drawable/ic_menu_edit"
-                        app:tint="@android:color/black" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/_16sdp"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <com.google.android.material.textfield.TextInputLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:hint="Notes"
-                            app:boxBackgroundMode="none"
-                            app:hintTextColor="#757575">
-
-                            <com.google.android.material.textfield.TextInputEditText
-                                android:id="@+id/et_note"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:background="@null"
-                                android:inputType="textMultiLine"
-                                android:minLines="2"
-                                android:textColor="@android:color/black"
-                                android:textSize="@dimen/_14ssp" />
-                        </com.google.android.material.textfield.TextInputLayout>
-
-                        <View
-                            android:layout_width="match_parent"
-                            android:layout_height="@dimen/_1sdp"
-                            android:background="#E0E0E0" />
-                    </LinearLayout>
-                </LinearLayout>
-
-                 <!-- Messenger Sections -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginTop="@dimen/_16sdp">
-
-                    <LinearLayout
-                        android:id="@+id/ll_messenger_container"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"/>
-
-                    <TextView
-                        android:id="@+id/tv_add_messenger"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/_52sdp"
-                        android:layout_marginTop="@dimen/_8sdp"
-                        android:text="Add messenger account"
-                        android:textColor="#4CAF50"
-                        android:textSize="@dimen/_12ssp"
-                        android:textStyle="bold"
-                        android:padding="@dimen/_8sdp"
-                        app:drawableStartCompat="@android:drawable/ic_input_add"
-                        app:drawableTint="#4CAF50"
-                        android:drawablePadding="@dimen/_8sdp"
-                        android:background="?attr/selectableItemBackground"/>
-                </LinearLayout>
-
-                 <!-- Nickname -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="@dimen/_16sdp"
-                    android:paddingStart="@dimen/_16sdp"
-                    android:paddingEnd="@dimen/_16sdp">
-
-                    <ImageView
-                        android:layout_width="@dimen/_20sdp"
-                        android:layout_height="@dimen/_20sdp"
-                        android:src="@android:drawable/ic_menu_info_details"
-                        app:tint="@android:color/black"
-                        android:layout_marginTop="@dimen/_12sdp"/>
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:layout_marginStart="@dimen/_16sdp">
-
-                        <com.google.android.material.textfield.TextInputLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:hint="Nickname"
-                            app:boxBackgroundMode="none"
-                            app:hintTextColor="#757575">
-
-                            <com.google.android.material.textfield.TextInputEditText
-                                android:id="@+id/et_nickname"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:textColor="@android:color/black"
-                                android:background="@null"
-                                android:inputType="textPersonName|textCapWords"
-                                android:textSize="@dimen/_14ssp"/>
-                        </com.google.android.material.textfield.TextInputLayout>
-
-                         <View
-                            android:layout_width="match_parent"
-                            android:layout_height="@dimen/_1sdp"
-                            android:background="#E0E0E0"/>
-
-                    </LinearLayout>
-                </LinearLayout>
-
-                <!-- Relationship Sections -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginTop="@dimen/_16sdp">
-
-                    <LinearLayout
-                        android:id="@+id/ll_relation_container"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"/>
-
-                    <TextView
-                        android:id="@+id/tv_add_relation"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/_52sdp"
-                        android:layout_marginTop="@dimen/_8sdp"
-                        android:text="Add relationship"
-                        android:textColor="#4CAF50"
-                        android:textSize="@dimen/_12ssp"
-                        android:textStyle="bold"
-                        android:padding="@dimen/_8sdp"
-                        app:drawableStartCompat="@android:drawable/ic_input_add"
-                        app:drawableTint="#4CAF50"
-                        android:drawablePadding="@dimen/_8sdp"
-                        android:background="?attr/selectableItemBackground"/>
-                </LinearLayout>
-
+                <EditText android:id="@+id/etNameSuffix"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:hint="Name suffix" android:textColorHint="#aaaaaa"
+                    android:textColor="#333333" android:background="@android:color/transparent"
+                    android:textSize="@dimen/_15ssp" android:inputType="textPersonName"/>
             </LinearLayout>
         </LinearLayout>
-    </ScrollView>
 
-</LinearLayout>
+        <!-- Phonetic name -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#F5F5F5"
+            android:layout_marginHorizontal="@dimen/_12sdp"
+            android:layout_marginBottom="@dimen/_8sdp"
+            android:padding="@dimen/_16sdp"
+            android:gravity="center_vertical">
+
+            <ImageView android:layout_width="@dimen/_24sdp" android:layout_height="@dimen/_24sdp"
+                android:src="@android:drawable/ic_menu_myplaces" app:tint="#666666"
+                android:contentDescription="phonetic"/>
+            <EditText android:id="@+id/etPhoneticName"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/_12sdp"
+                android:hint="Phonetic name" android:textColorHint="#aaaaaa"
+                android:textColor="#333333" android:background="@android:color/transparent"
+                android:textSize="@dimen/_16ssp"/>
+        </LinearLayout>
+
+        <!-- Nickname -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#F5F5F5"
+            android:layout_marginHorizontal="@dimen/_12sdp"
+            android:layout_marginBottom="@dimen/_16sdp"
+            android:padding="@dimen/_16sdp"
+            android:gravity="center_vertical">
+
+            <ImageView android:layout_width="@dimen/_24sdp" android:layout_height="@dimen/_24sdp"
+                android:src="@android:drawable/ic_menu_myplaces" app:tint="#666666"
+                android:contentDescription="nickname"/>
+            <EditText android:id="@+id/etNickname"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/_12sdp"
+                android:hint="Nickname" android:textColorHint="#aaaaaa"
+                android:textColor="#333333" android:background="@android:color/transparent"
+                android:textSize="@dimen/_16ssp"/>
+        </LinearLayout>
+
+        <!-- ══════════════════════════════════════════
+             PHONE SECTION
+        ══════════════════════════════════════════ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#F5F5F5"
+            android:layout_marginHorizontal="@dimen/_12sdp"
+            android:layout_marginBottom="@dimen/_8sdp"
+            android:padding="@dimen/_16sdp"
+            android:orientation="vertical">
+
+            <LinearLayout android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:gravity="center_vertical">
+                <ImageView android:layout_width="@dimen/_24sdp" android:layout_height="@dimen/_24sdp"
+                    android:src="@android:drawable/ic_menu_call" app:tint="#666666"
+                    android:contentDescription="phone"/>
+                <LinearLayout android:id="@+id/phoneContainer"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/_12sdp" android:orientation="vertical"/>
+            </LinearLayout>
+
+            <LinearLayout android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:layout_marginTop="@dimen/_8sdp">
+                <View android:layout_width="@dimen/_36sdp" android:layout_height="1dp"/>
+                <ImageView android:id="@+id/btnAddPhone"
+                    android:layout_width="@dimen/_24sdp" android:layout_height="@dimen/_24sdp"
+                    android:src="@android:drawable/ic_input_add"
+                    app:tint="#4CAF50"
+                    android:layout_marginStart="@dimen/_12sdp"
+                    android:contentDescription="Add phone"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="Add phone number" android:textColor="#4CAF50"
+                    android:layout_marginStart="@dimen/_8sdp" android:textSize="@dimen/_14ssp"
+                    android:id="@+id/tvAddPhone"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- ══════════════════════════════════════════
+             EMAIL SECTION
+        ══════════════════════════════════════════ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#F5F5F5"
+            android:layout_marginHorizontal="@dimen/_12sdp"
+            android:layout_marginBottom="@dimen/_8sdp"
+            android:padding="@dimen/_16sdp"
+            android:orientation="vertical">
+
+            <LinearLayout android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:gravity="center_vertical">
+                <ImageView android:layout_width="@dimen/_24sdp" android:layout_height="@dimen/_24sdp"
+                    android:src="@android:drawable/ic_dialog_email" app:tint="#666666"
+                    android:contentDescription="email"/>
+                <LinearLayout android:id="@+id/emailContainer"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/_12sdp" android:orientation="vertical"/>
+            </LinearLayout>
+
+            <LinearLayout android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:layout_marginTop="@dimen/_8sdp">
+                <View android:layout_width="@dimen/_36sdp" android:layout_height="1dp"/>
+                <ImageView android:id="@+id/btnAddEmail"
+                    android:layout_width="@dimen/_24sdp" android:layout_height="@dimen/_24sdp"
+                    android:src="@android:drawable/ic_input_add"
+                    app:tint="#4CAF50"
+                    android:layout_marginStart="@dimen/_12sdp"
+                    android:contentDescription="Add email"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="Add email" android:textColor="#4CAF50"
+                    android:layout_marginStart="@dimen/_8sdp" android:textSize="@dimen/_14ssp"
+                    android:id="@+id/tvAddEmail"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- ══════════════════════════════════════════
+             WORK INFO
+        ══════════════════════════════════════════ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#F5F5F5"
+            android:layout_marginHorizontal="@dimen/_12sdp"
+            android:layout_marginBottom="@dimen/_8sdp"
+            android:padding="@dimen/_16sdp"
+            android:orientation="vertical">
+
+            <LinearLayout android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:gravity="center_vertical"
+                android:layout_marginBottom="@dimen/_12sdp">
+                <ImageView android:layout_width="@dimen/_24sdp" android:layout_height="@dimen/_24sdp"
+                    android:src="@android:drawable/ic_menu_agenda" app:tint="#666666"
+                    android:contentDescription="work"/>
+                <EditText android:id="@+id/etJobTitle"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/_12sdp"
+                    android:hint="Job title" android:textColorHint="#aaaaaa"
+                    android:textColor="#333333" android:background="@android:color/transparent"
+                    android:textSize="@dimen/_16ssp"/>
+            </LinearLayout>
+
+            <View android:layout_width="match_parent" android:layout_height="1dp"
+                android:background="#ddd" android:layout_marginStart="@dimen/_36sdp" android:layout_marginBottom="@dimen/_12sdp"/>
+
+            <EditText android:id="@+id/etDepartment"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/_36sdp"
+                android:hint="Department" android:textColorHint="#aaaaaa"
+                android:textColor="#333333" android:background="@android:color/transparent"
+                android:textSize="@dimen/_16ssp" android:layout_marginBottom="@dimen/_12sdp"/>
+
+            <View android:layout_width="match_parent" android:layout_height="1dp"
+                android:background="#ddd" android:layout_marginStart="@dimen/_36sdp" android:layout_marginBottom="@dimen/_12sdp"/>
+
+            <EditText android:id="@+id/etCompany"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/_36sdp"
+                android:hint="Company" android:textColorHint="#aaaaaa"
+                android:textColor="#333333" android:background="@android:color/transparent"
+                android:textSize="@dimen/_16ssp"/>
+        </LinearLayout>
+
+        <!-- ══════════════════════════════════════════
+             ADDRESS SECTION
+        ══════════════════════════════════════════ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#F5F5F5"
+            android:layout_marginHorizontal="@dimen/_12sdp"
+            android:layout_marginBottom="@dimen/_8sdp"
+            android:padding="@dimen/_16sdp"
+            android:orientation="vertical">
+
+            <LinearLayout android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:gravity="center_vertical">
+                <ImageView android:layout_width="@dimen/_24sdp" android:layout_height="@dimen/_24sdp"
+                    android:src="@android:drawable/ic_menu_mapmode" app:tint="#666666"
+                    android:contentDescription="address"/>
+                <LinearLayout android:id="@+id/addressContainer"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/_12sdp" android:orientation="vertical"/>
+            </LinearLayout>
+
+            <LinearLayout android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:layout_marginTop="@dimen/_8sdp">
+                <View android:layout_width="@dimen/_36sdp" android:layout_height="1dp"/>
+                <ImageView android:id="@+id/btnAddAddress"
+                    android:layout_width="@dimen/_24sdp" android:layout_height="@dimen/_24sdp"
+                    android:src="@android:drawable/ic_input_add" app:tint="#4CAF50"
+                    android:layout_marginStart="@dimen/_12sdp" android:contentDescription="Add address"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="Add address" android:textColor="#4CAF50"
+                    android:layout_marginStart="@dimen/_8sdp" android:textSize="@dimen/_14ssp"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- ══════════════════════════════════════════
+             IMPORTANT DATES
+        ══════════════════════════════════════════ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#F5F5F5"
+            android:layout_marginHorizontal="@dimen/_12sdp"
+            android:layout_marginBottom="@dimen/_8sdp"
+            android:padding="@dimen/_16sdp"
+            android:orientation="vertical">
+
+            <LinearLayout android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:gravity="center_vertical">
+                <ImageView android:layout_width="@dimen/_24sdp" android:layout_height="@dimen/_24sdp"
+                    android:src="@android:drawable/ic_menu_today" app:tint="#666666"
+                    android:contentDescription="date"/>
+                <LinearLayout android:id="@+id/dateContainer"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/_12sdp" android:orientation="vertical"/>
+            </LinearLayout>
+
+            <LinearLayout android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:layout_marginTop="@dimen/_8sdp">
+                <View android:layout_width="@dimen/_36sdp" android:layout_height="1dp"/>
+                <ImageView android:id="@+id/btnAddDate"
+                    android:layout_width="@dimen/_24sdp" android:layout_height="@dimen/_24sdp"
+                    android:src="@android:drawable/ic_input_add" app:tint="#4CAF50"
+                    android:layout_marginStart="@dimen/_12sdp" android:contentDescription="Add date"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="Add important date" android:textColor="#4CAF50"
+                    android:layout_marginStart="@dimen/_8sdp" android:textSize="@dimen/_14ssp"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- ══════════════════════════════════════════
+             RELATIONSHIPS
+        ══════════════════════════════════════════ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#F5F5F5"
+            android:layout_marginHorizontal="@dimen/_12sdp"
+            android:layout_marginBottom="@dimen/_8sdp"
+            android:padding="@dimen/_16sdp"
+            android:orientation="vertical">
+
+            <LinearLayout android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:gravity="center_vertical">
+                <ImageView android:layout_width="@dimen/_24sdp" android:layout_height="@dimen/_24sdp"
+                    android:src="@android:drawable/ic_menu_share" app:tint="#666666"
+                    android:contentDescription="relationship"/>
+                <LinearLayout android:id="@+id/relationshipContainer"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/_12sdp" android:orientation="vertical"/>
+            </LinearLayout>
+
+            <LinearLayout android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:layout_marginTop="@dimen/_8sdp">
+                <View android:layout_width="@dimen/_36sdp" android:layout_height="1dp"/>
+                <ImageView android:id="@+id/btnAddRelationship"
+                    android:layout_width="@dimen/_24sdp" android:layout_height="@dimen/_24sdp"
+                    android:src="@android:drawable/ic_input_add" app:tint="#4CAF50"
+                    android:layout_marginStart="@dimen/_12sdp" android:contentDescription="Add relationship"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="Add relationship" android:textColor="#4CAF50"
+                    android:layout_marginStart="@dimen/_8sdp" android:textSize="@dimen/_14ssp"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- ══════════════════════════════════════════
+             NOTES
+        ══════════════════════════════════════════ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#F5F5F5"
+            android:layout_marginHorizontal="@dimen/_12sdp"
+            android:layout_marginBottom="@dimen/_8sdp"
+            android:padding="@dimen/_16sdp"
+            android:gravity="center_vertical">
+
+            <ImageView android:layout_width="@dimen/_24sdp" android:layout_height="@dimen/_24sdp"
+                android:src="@android:drawable/ic_menu_edit" app:tint="#666666"
+                android:contentDescription="notes"/>
+            <EditText android:id="@+id/etNotes"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/_12sdp"
+                android:hint="Notes" android:textColorHint="#aaaaaa"
+                android:textColor="#333333" android:background="@android:color/transparent"
+                android:textSize="@dimen/_16ssp" android:inputType="textMultiLine"
+                android:minLines="1" android:gravity="top"/>
+        </LinearLayout>
+
+        <!-- ══════════════════════════════════════════
+             WEBSITE
+        ══════════════════════════════════════════ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#F5F5F5"
+            android:layout_marginHorizontal="@dimen/_12sdp"
+            android:layout_marginBottom="@dimen/_8sdp"
+            android:padding="@dimen/_16sdp"
+            android:orientation="vertical">
+
+            <LinearLayout android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:gravity="center_vertical">
+                <ImageView android:layout_width="@dimen/_24sdp" android:layout_height="@dimen/_24sdp"
+                    android:src="@android:drawable/ic_menu_compass" app:tint="#666666"
+                    android:contentDescription="website"/>
+                <LinearLayout android:id="@+id/websiteContainer"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/_12sdp" android:orientation="vertical"/>
+            </LinearLayout>
+
+            <LinearLayout android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:layout_marginTop="@dimen/_8sdp">
+                <View android:layout_width="@dimen/_36sdp" android:layout_height="1dp"/>
+                <ImageView android:id="@+id/btnAddWebsite"
+                    android:layout_width="@dimen/_24sdp" android:layout_height="@dimen/_24sdp"
+                    android:src="@android:drawable/ic_input_add" app:tint="#4CAF50"
+                    android:layout_marginStart="@dimen/_12sdp" android:contentDescription="Add website"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="Add website" android:textColor="#4CAF50"
+                    android:layout_marginStart="@dimen/_8sdp" android:textSize="@dimen/_14ssp"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- ══════════════════════════════════════════
+             MESSENGER / IM
+        ══════════════════════════════════════════ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#F5F5F5"
+            android:layout_marginHorizontal="@dimen/_12sdp"
+            android:layout_marginBottom="@dimen/_16sdp"
+            android:padding="@dimen/_16sdp"
+            android:orientation="vertical">
+
+            <LinearLayout android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:gravity="center_vertical">
+                <ImageView android:layout_width="@dimen/_24sdp" android:layout_height="@dimen/_24sdp"
+                    android:src="@android:drawable/ic_menu_send" app:tint="#666666"
+                    android:contentDescription="messenger"/>
+                <LinearLayout android:id="@+id/imContainer"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/_12sdp" android:orientation="vertical"/>
+            </LinearLayout>
+
+            <LinearLayout android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:layout_marginTop="@dimen/_8sdp">
+                <View android:layout_width="@dimen/_36sdp" android:layout_height="1dp"/>
+                <ImageView android:id="@+id/btnAddIm"
+                    android:layout_width="@dimen/_24sdp" android:layout_height="@dimen/_24sdp"
+                    android:src="@android:drawable/ic_input_add" app:tint="#4CAF50"
+                    android:layout_marginStart="@dimen/_12sdp" android:contentDescription="Add account"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="Add account" android:textColor="#4CAF50"
+                    android:layout_marginStart="@dimen/_8sdp" android:textSize="@dimen/_14ssp"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- ══════════════════════════════════════════
+             BUTTONS
+        ══════════════════════════════════════════ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginHorizontal="@dimen/_12sdp"
+            android:gravity="center">
+
+            <Button android:id="@+id/btnCancel"
+                android:layout_width="0dp" android:layout_weight="1"
+                android:layout_height="@dimen/_48sdp"
+                android:text="Cancel"
+                android:textColor="#333333"
+                android:backgroundTint="#EEEEEE"
+                android:layout_marginEnd="@dimen/_8sdp"/>
+
+            <Button android:id="@+id/btnSave"
+                android:layout_width="0dp" android:layout_weight="1"
+                android:layout_height="@dimen/_48sdp"
+                android:text="Save"
+                android:textColor="@android:color/white"
+                android:backgroundTint="#1E90FF"/>
+        </LinearLayout>
+
+        <ProgressBar
+            android:id="@+id/progressSave"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="@dimen/_16sdp"
+            android:visibility="gone" />
+
+    </LinearLayout>
+</ScrollView>

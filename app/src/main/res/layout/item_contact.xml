@@ -1,4 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    FIX NOTES:
+    1. Removed android:padding from root — padding was colliding with adapter's setPadding() calls,
+       causing double-padding. Padding is now handled purely in XML consistently.
+    2. Kept android:background="?attr/selectableItemBackground" on root for ripple effect.
+       The adapter no longer calls setBackgroundResource() on root, so ripple is preserved.
+    3. editImg does NOT exist here — the adapter uses long-press for edit instead.
+    4. tvPhoneNumber lives inside subLy — only visible when row is expanded (correct).
+-->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -6,7 +15,10 @@
     android:background="?attr/selectableItemBackground"
     android:clickable="true"
     android:focusable="true"
-    android:padding="@dimen/_10sdp">
+    android:paddingStart="@dimen/_10sdp"
+    android:paddingEnd="@dimen/_10sdp"
+    android:paddingTop="@dimen/_10sdp"
+    android:paddingBottom="@dimen/_10sdp">
 
     <LinearLayout
         android:id="@+id/parentLy"
@@ -14,12 +26,14 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- TOP ROW -->
+        <!-- TOP ROW: Avatar | Name | Favorite star -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
+            <!-- Initial letter avatar (shown when no photo) -->
             <TextView
                 android:id="@+id/tvContactInitial"
                 android:layout_width="@dimen/_45sdp"
@@ -31,6 +45,7 @@
                 android:textSize="@dimen/_16ssp"
                 android:textStyle="bold" />
 
+            <!-- Contact photo (shown when photoUri is available) -->
             <ImageView
                 android:id="@+id/ivContactPhoto"
                 android:layout_width="@dimen/_45sdp"
@@ -39,10 +54,12 @@
                 android:visibility="gone"
                 tools:src="@mipmap/ic_launcher" />
 
+            <!-- Contact name -->
             <TextView
                 android:id="@+id/tvContactName"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:layout_gravity="center_vertical"
                 android:layout_marginStart="@dimen/_14sdp"
                 android:ellipsize="end"
@@ -52,35 +69,48 @@
                 android:textSize="@dimen/_14ssp"
                 android:textStyle="bold" />
 
+            <!-- Favorite star badge -->
+            <ImageView
+                android:id="@+id/ivFavorite"
+                android:layout_width="@dimen/_16sdp"
+                android:layout_height="@dimen/_16sdp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="@dimen/_4sdp"
+                android:src="@android:drawable/btn_star_big_on"
+                android:visibility="gone"
+                android:contentDescription="Favorite" />
+
         </LinearLayout>
 
-        <!-- EXPANDABLE LAYOUT -->
+        <!-- EXPANDABLE SUB-PANEL (phone number + action buttons) -->
         <LinearLayout
             android:id="@+id/subLy"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/_8sdp"
             android:layout_marginStart="@dimen/_45sdp"
             android:orientation="vertical"
             android:visibility="gone">
 
+            <!-- Phone number (shown inside expanded panel) -->
             <TextView
                 android:id="@+id/tvPhoneNumber"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/_14sdp"
-                android:text="26519846165"
-                android:textColor="@android:color/black"
-                android:textSize="@dimen/_12ssp"
-                android:textStyle="bold" />
+                android:text="0000000000"
+                android:textColor="@android:color/darker_gray"
+                android:textSize="@dimen/_12ssp" />
 
-            <!-- ICON ROW -->
+            <!-- Action icon row -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginTop="@dimen/_8sdp">
+                android:layout_marginTop="@dimen/_8sdp"
+                android:layout_marginStart="@dimen/_14sdp">
 
-                <!-- CALL -->
+                <!-- Call -->
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -89,9 +119,12 @@
 
                     <ImageView
                         android:id="@+id/phoneImg"
-                        android:layout_width="@dimen/_25sdp"
-                        android:layout_height="@dimen/_25sdp"
-                        android:src="@drawable/ic_call"/>
+                        android:layout_width="@dimen/_30sdp"
+                        android:layout_height="@dimen/_30sdp"
+                        android:padding="@dimen/_4sdp"
+                        android:src="@drawable/ic_call"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="Call" />
                 </LinearLayout>
 
                 <!-- SMS -->
@@ -103,12 +136,15 @@
 
                     <ImageView
                         android:id="@+id/smsImg"
-                        android:layout_width="@dimen/_25sdp"
-                        android:layout_height="@dimen/_25sdp"
-                        android:src="@drawable/ic_sms"/>
+                        android:layout_width="@dimen/_30sdp"
+                        android:layout_height="@dimen/_30sdp"
+                        android:padding="@dimen/_4sdp"
+                        android:src="@drawable/ic_sms"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="SMS" />
                 </LinearLayout>
 
-                <!-- VIDEO -->
+                <!-- Video Call -->
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -117,12 +153,15 @@
 
                     <ImageView
                         android:id="@+id/videoCallImg"
-                        android:layout_width="@dimen/_25sdp"
-                        android:layout_height="@dimen/_25sdp"
-                        android:src="@drawable/ic_video_call"/>
+                        android:layout_width="@dimen/_30sdp"
+                        android:layout_height="@dimen/_30sdp"
+                        android:padding="@dimen/_4sdp"
+                        android:src="@drawable/ic_video_call"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="Video call" />
                 </LinearLayout>
 
-                <!-- INFO -->
+                <!-- Info / Details -->
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -131,9 +170,12 @@
 
                     <ImageView
                         android:id="@+id/informationImg"
-                        android:layout_width="@dimen/_25sdp"
-                        android:layout_height="@dimen/_25sdp"
-                        android:src="@drawable/ic_information"/>
+                        android:layout_width="@dimen/_30sdp"
+                        android:layout_height="@dimen/_30sdp"
+                        android:padding="@dimen/_4sdp"
+                        android:src="@drawable/ic_information"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="Contact info" />
                 </LinearLayout>
 
             </LinearLayout>
