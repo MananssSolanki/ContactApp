@@ -22,6 +22,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.contactapp.Activities.ContactInformationActivity
 import com.example.contactapp.Activities.AddContactActivity
+import com.example.contactapp.Activities.SearchActivity
 import com.example.contactapp.Adapter.ContactsAdapter
 import com.example.contactapp.Model.ContactListItemEnhanced
 import com.example.contactapp.Utils.SwipeCallback
@@ -159,13 +160,19 @@ class ContactsFragment : Fragment() {
     }
 
     private fun setupSearchView() {
-        binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?) = false
-            override fun onQueryTextChange(newText: String?): Boolean {
-                viewModel.searchContacts(newText ?: "")
-                return true
+        // Intercept search click to open dedicated SearchActivity
+        binding.searchView.setOnSearchClickListener {
+            startActivity(Intent(requireContext(), SearchActivity::class.java))
+            binding.searchView.isIconified = true // Reset the SearchView in the fragment
+        }
+        
+        // Also handle the case where iconified is false (already open)
+        binding.searchView.setOnQueryTextFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                startActivity(Intent(requireContext(), SearchActivity::class.java))
+                binding.searchView.clearFocus()
             }
-        })
+        }
     }
 
     private fun setupFastScroller() {
