@@ -443,6 +443,51 @@ class ContactsRepository(private val context: Context) {
         } catch (e: Exception) { e.printStackTrace(); false }
     }
 
+    suspend fun deleteContacts(contactIds: List<String>): Boolean = withContext(Dispatchers.IO) {
+        if (contactIds.isEmpty()) return@withContext true
+        var success = true
+        try {
+            // Using SyncAdapter parameter physically purges the contact entirely from the Android DB,
+            // avoiding Recycle Bins and ensuring all OEM apps (like Samsung Contacts) see it as deleted.
+            val syncUri = ContactsContract.RawContacts.CONTENT_URI.buildUpon()
+                .appendQueryParameter(ContactsContract.CALLER_IS_SYNCADAPTER, "true")
+                .build()
+
+            contactIds.forEach { id ->
+                val rawCount = context.contentResolver.delete(
+                    syncUri,
+                    "${ContactsContract.RawContacts.CONTACT_ID} = ?",
+                    arrayOf(id)
+                )
+
+                if (rawCount <= 0) {
+                    // Fallback to standard contact deletion if raw contact delete failed
+                    var lookupKey: String? = null
+                    context.contentResolver.query(
+                        Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_URI, id),
+                        arrayOf(ContactsContract.Contacts.LOOKUP_KEY),
+                        null, null, null
+                    )?.use { cursor ->
+                        if (cursor.moveToFirst()) {
+                            lookupKey = cursor.getString(0)
+                        }
+                    }
+
+                    if (lookupKey != null) {
+                        val uri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_LOOKUP_URI, lookupKey!!)
+                        context.contentResolver.delete(uri, null, null)
+                    } else {
+                        success = false
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            success = false
+        }
+        success
+    }
+
     suspend fun deleteCallHistory(phoneNumber: String): Boolean = withContext(Dispatchers.IO) {
         try {
             context.contentResolver.delete(

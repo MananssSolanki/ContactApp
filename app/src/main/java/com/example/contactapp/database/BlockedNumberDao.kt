@@ -14,6 +14,6 @@ interface BlockedNumberDao {
     @Query("DELETE FROM blocked_numbers WHERE phone_number = :phoneNumber")
     suspend fun deleteByPhoneNumber(phoneNumber: String): Int
 
-    @Query("SELECT EXISTS(SELECT 1 FROM blocked_numbers WHERE phone_number = :phoneNumber)")
-    suspend fun isBlocked(phoneNumber: String): Boolean
+    @Query("SELECT COUNT(*) FROM blocked_numbers WHERE phone_number = :phoneNumber")
+    suspend fun isBlocked(phoneNumber: String): Int
 }

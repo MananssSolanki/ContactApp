@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingTop="6dp"
+    android:paddingBottom="6dp"
+    android:background="@android:color/transparent">
+
+    <!-- White card wrapper -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/bg_samsung_card"
+        android:elevation="1dp">
+
+        <!-- Group header row: checkbox + phone number text + divider + info icon -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp">
+
+            <CheckBox
+                android:id="@+id/checkboxGroup"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:buttonTint="@color/samsung_blue"
+                android:layout_marginEnd="4dp" />
+
+            <TextView
+                android:id="@+id/textGroupKey"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:textSize="15sp"
+                android:textColor="@color/samsung_title_text"
+                android:textStyle="bold"
+                android:ellipsize="end"
+                android:maxLines="1" />
+
+            <!-- Vertical divider -->
+            <View
+                android:layout_width="1dp"
+                android:layout_height="22dp"
+                android:background="@color/samsung_divider"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="12dp" />
+
+            <!-- Info icon -->
+            <ImageView
+                android:id="@+id/imgInfoIcon"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@drawable/ic_information"
+                app:tint="@color/samsung_blue" />
+        </LinearLayout>
+
+        <!-- Thin divider between header and contacts -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/samsung_divider"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp" />
+
+        <!-- Contact sub-rows injected dynamically -->
+        <LinearLayout
+            android:id="@+id/layoutContacts"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="8dp" />
+
+    </LinearLayout>
+
+</LinearLayout>

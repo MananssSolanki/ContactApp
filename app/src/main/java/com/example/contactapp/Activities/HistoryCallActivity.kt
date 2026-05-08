@@ -135,6 +135,19 @@ class HistoryCallActivity : AppCompatActivity() {
         }
     }
 
+    private val deletePermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            val ids = callLogAdapter.selectedIds.toList()
+            if (ids.isNotEmpty()) {
+                executeDeleteLogs(ids)
+            }
+        } else {
+            Toast.makeText(this, "Permission required to delete call logs", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     private fun deleteSelectedLogs() {
         val ids = callLogAdapter.selectedIds.toList()
         if (ids.isEmpty()) {
@@ -142,6 +155,18 @@ class HistoryCallActivity : AppCompatActivity() {
             return
         }
 
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.WRITE_CALL_LOG
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            executeDeleteLogs(ids)
+        } else {
+            deletePermissionLauncher.launch(Manifest.permission.WRITE_CALL_LOG)
+        }
+    }
+
+    private fun executeDeleteLogs(ids: List<String>) {
         lifecycleScope.launch {
             val success = callLogRepository.deleteCallLogs(ids)
             if (success) {
@@ -170,10 +195,11 @@ class HistoryCallActivity : AppCompatActivity() {
     }
 
     private fun makeCallInternal(phoneNumber: String) {
-        val telecomManager = getSystemService(TelecomManager::class.java)
-        val uri = Uri.fromParts("tel", phoneNumber, null)
         try {
-            telecomManager.placeCall(uri, Bundle())
+            val intent = Intent(Intent.ACTION_CALL).apply {
+                data = Uri.fromParts("tel", phoneNumber, null)
+            }
+            startActivity(intent)
         } catch (e: Exception) {
             Toast.makeText(this, "Call failed: ${e.message}", Toast.LENGTH_SHORT).show()
         }

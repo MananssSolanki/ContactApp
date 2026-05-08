@@ -108,10 +108,11 @@ class SearchActivity : AppCompatActivity() {
             callPermissionLauncher.launch(Manifest.permission.CALL_PHONE)
             return
         }
-        val telecomManager = this@SearchActivity.getSystemService(TelecomManager::class.java)
-        val uri = Uri.fromParts("tel", phoneNumber, null)
         try {
-            telecomManager.placeCall(uri, Bundle())
+            val intent = Intent(Intent.ACTION_CALL).apply {
+                data = Uri.fromParts("tel", phoneNumber, null)
+            }
+            startActivity(intent)
         } catch (e: Exception) {
             Toast.makeText(this@SearchActivity, "Call failed", Toast.LENGTH_SHORT).show()
         }
@@ -139,13 +140,12 @@ class SearchActivity : AppCompatActivity() {
             callPermissionLauncher.launch(Manifest.permission.CALL_PHONE)
             return
         }
-        val telecomManager = this@SearchActivity.getSystemService(TelecomManager::class.java)
-        val uri = Uri.fromParts("tel", phoneNumber, null)
-        val extras = Bundle().apply {
-            putInt(TelecomManager.EXTRA_START_CALL_WITH_VIDEO_STATE, VideoProfile.STATE_BIDIRECTIONAL)
-        }
         try {
-            telecomManager.placeCall(uri, extras)
+            val intent = Intent(Intent.ACTION_CALL).apply {
+                data = Uri.fromParts("tel", phoneNumber, null)
+                putExtra(android.telecom.TelecomManager.EXTRA_START_CALL_WITH_VIDEO_STATE, android.telecom.VideoProfile.STATE_BIDIRECTIONAL)
+            }
+            startActivity(intent)
         } catch (e: Exception) {
             Toast.makeText(this@SearchActivity, "Video call failed", Toast.LENGTH_SHORT).show()
         }

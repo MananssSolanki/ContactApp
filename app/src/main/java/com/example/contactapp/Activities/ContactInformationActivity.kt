@@ -62,7 +62,7 @@ class ContactInformationActivity : AppCompatActivity() {
             if (result.resultCode == RESULT_OK) {
                 // Signal to calling fragment to reload contacts
                 setResult(RESULT_OK)
-                
+
                 // Reload contact info from repository to get latest data
                 contact?.let { c ->
                     lifecycleScope.launch {
@@ -150,9 +150,14 @@ class ContactInformationActivity : AppCompatActivity() {
             }
         }
 
-        // ⋮ More Options
+        // ⋮ More Options — always refresh block state before showing menu
         binding.btnMore.setOnClickListener { view ->
-            showMoreOptionsMenu(view)
+            lifecycleScope.launch {
+                contact?.phoneNumber?.let { phone ->
+                    isBlocked = blockedNumberRepository.isBlocked(phone)
+                }
+                showMoreOptionsMenu(view)
+            }
         }
     }
 
@@ -169,7 +174,7 @@ class ContactInformationActivity : AppCompatActivity() {
         data?.let {
             contact = it
             isFavorite = it.isFavorite
-            // Check blocked status
+            // Check blocked status on IO thread via repository
             isBlocked = blockedNumberRepository.isBlocked(it.phoneNumber)
             displayContactInfo(it)
             updateFavoriteIcon()
@@ -223,7 +228,7 @@ class ContactInformationActivity : AppCompatActivity() {
         val popup = PopupMenu(this, anchor)
         popup.menuInflater.inflate(R.menu.menu_contact_info, popup.menu)
 
-        // Change "Block Number" label based on current blocked state
+        // Change "Block Number" label based on refreshed blocked state
         popup.menu.findItem(R.id.action_block)?.title =
             if (isBlocked) "Unblock Number" else "Block Number"
 
@@ -243,7 +248,7 @@ class ContactInformationActivity : AppCompatActivity() {
         popup.show()
     }
 
-    // 🚫 Block / Unblock (Room blocked_numbers table)
+    // 🚫 Block / Unblock
     private fun handleBlockUnblock() {
         val phone = contact?.phoneNumber ?: return
         lifecycleScope.launch {
@@ -260,7 +265,11 @@ class ContactInformationActivity : AppCompatActivity() {
                     Toast.LENGTH_SHORT
                 ).show()
             } else {
-                Toast.makeText(this@ContactInformationActivity, "Operation failed", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this@ContactInformationActivity,
+                    "Operation failed",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
     }
@@ -301,7 +310,11 @@ class ContactInformationActivity : AppCompatActivity() {
             adapter = callLogAdapterShort
         }
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CALL_LOG) == PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.READ_CALL_LOG
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
             binding.layoutPermissionDenied.visibility = View.GONE
             loadCallLogs(phoneNumber)
         } else {
@@ -316,8 +329,10 @@ class ContactInformationActivity : AppCompatActivity() {
             val logs = callLogRepository.getCallLogs(phoneNumber)
             val shortList = logs.take(10)
             callLogAdapterShort.submitList(shortList)
-            binding.rvCallHistoryShort.visibility = if (shortList.isNotEmpty()) View.VISIBLE else View.GONE
-            binding.btnViewMoreHistory.visibility = if (logs.size > 10) View.VISIBLE else View.GONE
+            binding.rvCallHistoryShort.visibility =
+                if (shortList.isNotEmpty()) View.VISIBLE else View.GONE
+            binding.btnViewMoreHistory.visibility =
+                if (logs.size > 10) View.VISIBLE else View.GONE
         }
     }
 
@@ -342,10 +357,11 @@ class ContactInformationActivity : AppCompatActivity() {
 
     @RequiresPermission(Manifest.permission.CALL_PHONE)
     private fun makeCallInternal(phoneNumber: String) {
-        val telecomManager = getSystemService(TelecomManager::class.java)
-        val uri = Uri.fromParts("tel", phoneNumber, null)
         try {
-            telecomManager.placeCall(uri, Bundle())
+            val intent = Intent(Intent.ACTION_CALL).apply {
+                data = Uri.fromParts("tel", phoneNumber, null)
+            }
+            startActivity(intent)
         } catch (e: Exception) {
             Toast.makeText(this, "Call failed: ${e.message}", Toast.LENGTH_SHORT).show()
         }

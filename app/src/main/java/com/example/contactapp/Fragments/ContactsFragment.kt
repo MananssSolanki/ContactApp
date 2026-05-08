@@ -11,17 +11,19 @@ import android.telecom.VideoProfile
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.contactapp.Activities.ContactInformationActivity
 import com.example.contactapp.Activities.AddContactActivity
+import com.example.contactapp.Activities.ContactInformationActivity
+import com.example.contactapp.Activities.ManageContactsActivity
+import com.example.contactapp.Activities.RecycleBinActivity
 import com.example.contactapp.Activities.SearchActivity
 import com.example.contactapp.Adapter.ContactsAdapter
 import com.example.contactapp.Model.ContactListItemEnhanced
@@ -30,7 +32,6 @@ import com.example.contactapp.ViewModel.ContactsViewModel
 import com.example.contactapp.databinding.FragmentContactBinding
 
 class ContactsFragment : Fragment() {
-
     private var _binding: FragmentContactBinding? = null
     private val binding get() = _binding!!
 
@@ -47,10 +48,6 @@ class ContactsFragment : Fragment() {
             }
         }
 
-    /**
-     * FIX: Launched when returning from ContactInformationActivity.
-     * Only force-reloads if result was OK (contact was edited/deleted).
-     */
     private val contactInfoLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
@@ -59,13 +56,17 @@ class ContactsFragment : Fragment() {
             }
         }
 
-    /**
-     * FIX: Launched when returning from AddContactActivity or system add-contact.
-     * Invalidates cache and force-reloads so new contact appears immediately.
-     */
     private val addContactLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK || result.resultCode == Activity.RESULT_FIRST_USER) {
+                viewModel.invalidateCache()
+                viewModel.loadContacts(force = true)
+            }
+        }
+
+    private val recycleBinLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
                 viewModel.invalidateCache()
                 viewModel.loadContacts(force = true)
             }
@@ -83,29 +84,79 @@ class ContactsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setupRecyclerView()
         setupObservers()
-        setupSearchView()
+        setupSearchAndMenu()
         setupFastScroller()
         checkPermissions()
 
         binding.btnAddContact.setOnClickListener {
-            // Open in-app AddContactActivity instead of system contacts editor
             val intent = Intent(requireContext(), AddContactActivity::class.java)
             addContactLauncher.launch(intent)
         }
     }
 
-    /**
-     * FIX: onResume no longer unconditionally reloads.
-     * ViewModel cache guard prevents duplicate loads.
-     */
     override fun onResume() {
         super.onResume()
-        // Let ViewModel decide based on cache validity
         val hasPermission = ContextCompat.checkSelfPermission(
             requireContext(), Manifest.permission.READ_CONTACTS
         ) == PackageManager.PERMISSION_GRANTED
         if (hasPermission) {
-            viewModel.loadContacts() // cache guard inside ViewModel
+            viewModel.loadContacts()
+        }
+    }
+
+    /**
+     * Sets up the search icon (opens SearchActivity) and
+     * the 3-dot more-options popup menu with:
+     *   Edit | Manage contacts | Recycle bin | Contacts settings | Settings
+     */
+    private fun setupSearchAndMenu() {
+        // Search icon tap → open SearchActivity
+        binding.searchView.setOnClickListener {
+            startActivity(Intent(requireContext(), SearchActivity::class.java))
+        }
+
+        // More options (⋮) → popup menu
+        binding.imgMoreOptions.setOnClickListener { anchor ->
+            val popup = PopupMenu(requireContext(), anchor)
+            popup.menuInflater.inflate(com.example.contactapp.R.menu.contact_more_menu, popup.menu)
+            popup.setOnMenuItemClickListener { item ->
+                when (item.itemId) {
+                    com.example.contactapp.R.id.menu_edit -> {
+                        // Enter multi-selection edit mode
+                        Toast.makeText(requireContext(), "Select contacts to edit", Toast.LENGTH_SHORT).show()
+                        true
+                    }
+                    com.example.contactapp.R.id.menu_manage_contacts -> {
+                        startActivity(Intent(requireContext(), ManageContactsActivity::class.java))
+                        true
+                    }
+                    com.example.contactapp.R.id.menu_recycle_bin -> {
+                        recycleBinLauncher.launch(Intent(requireContext(), RecycleBinActivity::class.java))
+                        true
+                    }
+                    com.example.contactapp.R.id.menu_contacts_settings -> {
+                        // Open Android system contact settings
+                        try {
+                            startActivity(Intent(android.provider.Settings.ACTION_SYNC_SETTINGS))
+                        } catch (e: Exception) {
+                            Toast.makeText(requireContext(), "Settings not available", Toast.LENGTH_SHORT).show()
+                        }
+                        true
+                    }
+                    com.example.contactapp.R.id.menu_settings -> {
+                        try {
+                            startActivity(Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                data = Uri.parse("package:${requireContext().packageName}")
+                            })
+                        } catch (e: Exception) {
+                            Toast.makeText(requireContext(), "Settings not available", Toast.LENGTH_SHORT).show()
+                        }
+                        true
+                    }
+                    else -> false
+                }
+            }
+            popup.show()
         }
     }
 
@@ -121,25 +172,35 @@ class ContactsFragment : Fragment() {
                 contactInfoLauncher.launch(intent)
             }
             setOnEditClickListener { contact ->
-                // Open in-app AddContactActivity in edit mode
                 val intent = Intent(requireContext(), AddContactActivity::class.java).apply {
                     putExtra("CONTACT_DATA", contact)
                     putExtra("IS_EDIT_MODE", true)
                 }
                 addContactLauncher.launch(intent)
             }
+            setOnSelectionChangeListener { count ->
+                updateSelectionUI(count)
+            }
         }
+
+        binding.selectionToolbar.visibility = View.GONE
+        binding.bottomActionBar.visibility = View.GONE
+
+        binding.btnCancelSelection.setOnClickListener { contactsAdapter.clearSelection() }
+        binding.cbSelectAll.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) contactsAdapter.selectAll() else contactsAdapter.clearSelection()
+        }
+
+        binding.btnDelete.setOnClickListener { deleteSelectedContacts() }
+        binding.btnMessage.setOnClickListener { messageSelectedContacts() }
+        binding.btnShare.setOnClickListener { shareSelectedContacts() }
+        binding.btnMeet.setOnClickListener { meetSelectedContacts() }
 
         binding.rvPhoneContacts.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = contactsAdapter
         }
 
-        /**
-         * FIX: SwipeCallback draws LEFT=Call (green), RIGHT=SMS (blue).
-         * Previously the fragment handler had them REVERSED.
-         * Now: swipe LEFT → call, swipe RIGHT → SMS — matching the visual indicator.
-         */
         val swipeHandler = object : SwipeCallback(requireContext()) {
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 val position = viewHolder.adapterPosition
@@ -150,29 +211,13 @@ class ContactsFragment : Fragment() {
                 }
                 val contact = item.contact
                 when (direction) {
-                    ItemTouchHelper.LEFT -> makeCall(contact.phoneNumber)  // LEFT = Call (green)
-                    ItemTouchHelper.RIGHT -> openSmsApp(contact.phoneNumber) // RIGHT = SMS (blue)
+                    ItemTouchHelper.LEFT -> makeCall(contact.phoneNumber)
+                    ItemTouchHelper.RIGHT -> openSmsApp(contact.phoneNumber)
                 }
                 contactsAdapter.notifyItemChanged(position)
             }
         }
         ItemTouchHelper(swipeHandler).attachToRecyclerView(binding.rvPhoneContacts)
-    }
-
-    private fun setupSearchView() {
-        // Intercept search click to open dedicated SearchActivity
-        binding.searchView.setOnSearchClickListener {
-            startActivity(Intent(requireContext(), SearchActivity::class.java))
-            binding.searchView.isIconified = true // Reset the SearchView in the fragment
-        }
-        
-        // Also handle the case where iconified is false (already open)
-        binding.searchView.setOnQueryTextFocusChangeListener { _, hasFocus ->
-            if (hasFocus) {
-                startActivity(Intent(requireContext(), SearchActivity::class.java))
-                binding.searchView.clearFocus()
-            }
-        }
     }
 
     private fun setupFastScroller() {
@@ -235,10 +280,11 @@ class ContactsFragment : Fragment() {
             callPermissionLauncher.launch(Manifest.permission.CALL_PHONE)
             return
         }
-        val telecomManager = requireContext().getSystemService(TelecomManager::class.java)
-        val uri = Uri.fromParts("tel", phoneNumber, null)
         try {
-            telecomManager.placeCall(uri, Bundle())
+            val intent = Intent(Intent.ACTION_CALL).apply {
+                data = Uri.fromParts("tel", phoneNumber, null)
+            }
+            startActivity(intent)
         } catch (e: Exception) {
             Toast.makeText(requireContext(), "Call failed", Toast.LENGTH_SHORT).show()
         }
@@ -257,16 +303,107 @@ class ContactsFragment : Fragment() {
             callPermissionLauncher.launch(Manifest.permission.CALL_PHONE)
             return
         }
-        val telecomManager = requireContext().getSystemService(TelecomManager::class.java)
-        val uri = Uri.fromParts("tel", phoneNumber, null)
-        val extras = Bundle().apply {
-            putInt(TelecomManager.EXTRA_START_CALL_WITH_VIDEO_STATE, VideoProfile.STATE_BIDIRECTIONAL)
-        }
         try {
-            telecomManager.placeCall(uri, extras)
+            val intent = Intent(Intent.ACTION_CALL).apply {
+                data = Uri.fromParts("tel", phoneNumber, null)
+                putExtra(android.telecom.TelecomManager.EXTRA_START_CALL_WITH_VIDEO_STATE, android.telecom.VideoProfile.STATE_BIDIRECTIONAL)
+            }
+            startActivity(intent)
         } catch (e: Exception) {
             Toast.makeText(requireContext(), "Video call failed", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun updateSelectionUI(count: Int) {
+        if (count > 0) {
+            binding.toolbar.visibility = View.GONE
+            binding.selectionToolbar.visibility = View.VISIBLE
+            binding.bottomActionBar.visibility = View.VISIBLE
+            binding.tvSelectionCount.text = "$count selected"
+            binding.cbSelectAll.isChecked = count == contactsAdapter.currentList
+                .filterIsInstance<ContactListItemEnhanced.ContactItem>().size
+        } else {
+            binding.toolbar.visibility = View.VISIBLE
+            binding.selectionToolbar.visibility = View.GONE
+            binding.bottomActionBar.visibility = View.GONE
+            binding.cbSelectAll.isChecked = false
+        }
+    }
+
+    private val deleteContactsPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            val ids = contactsAdapter.selectedIds.toList()
+            if (ids.isNotEmpty()) {
+                executeDeleteContacts(ids)
+            }
+        } else {
+            Toast.makeText(requireContext(), "Permission required to delete contacts", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun deleteSelectedContacts() {
+        val ids = contactsAdapter.selectedIds.toList()
+        if (ids.isEmpty()) return
+
+        androidx.appcompat.app.AlertDialog.Builder(requireContext())
+            .setTitle("Delete Contacts")
+            .setMessage("Are you sure you want to delete ${ids.size} contacts?")
+            .setPositiveButton("Delete") { _, _ ->
+                if (ContextCompat.checkSelfPermission(
+                        requireContext(),
+                        Manifest.permission.WRITE_CONTACTS
+                    ) == PackageManager.PERMISSION_GRANTED
+                ) {
+                    executeDeleteContacts(ids)
+                } else {
+                    deleteContactsPermissionLauncher.launch(Manifest.permission.WRITE_CONTACTS)
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun executeDeleteContacts(ids: List<String>) {
+        viewModel.deleteSelectedContacts(ids) { success ->
+            if (success) {
+                Toast.makeText(context, "Deleted ${ids.size} contacts", Toast.LENGTH_SHORT).show()
+                contactsAdapter.clearSelection()
+            } else {
+                Toast.makeText(context, "Failed to delete contacts", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun messageSelectedContacts() {
+        val selectedContacts = contactsAdapter.currentList
+            .filterIsInstance<ContactListItemEnhanced.ContactItem>()
+            .filter { it.contact.contactId in contactsAdapter.selectedIds }
+        if (selectedContacts.isEmpty()) return
+        val phoneNumbers = selectedContacts.joinToString(";") { it.contact.phoneNumber }
+        openSmsApp(phoneNumbers)
+        contactsAdapter.clearSelection()
+    }
+
+    private fun shareSelectedContacts() {
+        val selectedContacts = contactsAdapter.currentList
+            .filterIsInstance<ContactListItemEnhanced.ContactItem>()
+            .filter { it.contact.contactId in contactsAdapter.selectedIds }
+        if (selectedContacts.isEmpty()) return
+        val shareText = selectedContacts.joinToString("\n\n") {
+            "${it.contact.name}: ${it.contact.phoneNumber}"
+        }
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, shareText)
+        }
+        startActivity(Intent.createChooser(intent, "Share Contacts"))
+        contactsAdapter.clearSelection()
+    }
+
+    private fun meetSelectedContacts() {
+        Toast.makeText(context, "Meet feature coming soon", Toast.LENGTH_SHORT).show()
     }
 
     override fun onDestroyView() {

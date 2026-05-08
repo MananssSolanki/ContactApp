@@ -21,8 +21,18 @@ class ContactsAdapter : ListAdapter<ContactListItemEnhanced, RecyclerView.ViewHo
     private var onVideoCallClick: ((ContactEnhanced) -> Unit)? = null
     private var onInformationClick: ((ContactEnhanced) -> Unit)? = null
     private var onEditClick: ((ContactEnhanced) -> Unit)? = null
+    private var onSelectionChanged: ((Int) -> Unit)? = null
 
     private var expandedPosition = -1
+
+    // Selection state
+    var isSelectionMode = false
+        set(value) {
+            field = value
+            if (!value) selectedIds.clear()
+            notifyDataSetChanged()
+        }
+    val selectedIds = mutableSetOf<String>()
 
     companion object {
         private const val TYPE_HEADER = 0
@@ -35,6 +45,23 @@ class ContactsAdapter : ListAdapter<ContactListItemEnhanced, RecyclerView.ViewHo
     fun setOnVideoCallClickListener(listener: (ContactEnhanced) -> Unit) { onVideoCallClick = listener }
     fun setOnInformationClickListener(listener: (ContactEnhanced) -> Unit) { onInformationClick = listener }
     fun setOnEditClickListener(listener: (ContactEnhanced) -> Unit) { onEditClick = listener }
+    fun setOnSelectionChangeListener(listener: (Int) -> Unit) { onSelectionChanged = listener }
+
+    fun selectAll() {
+        val contactIds = currentList.filterIsInstance<ContactListItemEnhanced.ContactItem>()
+            .map { it.contact.contactId }
+        selectedIds.clear()
+        selectedIds.addAll(contactIds)
+        notifyDataSetChanged()
+        onSelectionChanged?.invoke(selectedIds.size)
+    }
+
+    fun clearSelection() {
+        selectedIds.clear()
+        isSelectionMode = false
+        notifyDataSetChanged()
+        onSelectionChanged?.invoke(0)
+    }
 
     override fun getItemViewType(position: Int): Int {
         return when (getItem(position)) {
@@ -115,6 +142,19 @@ class ContactsAdapter : ListAdapter<ContactListItemEnhanced, RecyclerView.ViewHo
         fun bind(contact: ContactEnhanced, position: Int) {
             binding.tvContactName.text = contact.name
 
+            // Selection indicator
+            val isSelected = selectedIds.contains(contact.contactId)
+            binding.ivSelectionCheck.visibility = if (isSelectionMode && isSelected) View.VISIBLE else View.GONE
+            
+            // Background color change when selected
+            if (isSelectionMode && isSelected) {
+                val baseColor = itemView.context.getColor(R.color.teal_700)
+                val alphaColor = androidx.core.graphics.ColorUtils.setAlphaComponent(baseColor, 25) // ~10% alpha (0-255)
+                binding.root.setBackgroundColor(alphaColor)
+            } else {
+                binding.root.background = null // Restore default ripple background from XML
+            }
+
             // FIX: Always clear Glide on recycle first, then decide what to show.
             // Prevents stale photos appearing on recycled ViewHolders.
             Glide.with(binding.root.context).clear(binding.ivContactPhoto)
@@ -153,12 +193,16 @@ class ContactsAdapter : ListAdapter<ContactListItemEnhanced, RecyclerView.ViewHo
             binding.subLy.visibility = if (isExpanded) View.VISIBLE else View.GONE
 
             binding.root.setOnClickListener {
-                val pos = adapterPosition
-                if (pos == RecyclerView.NO_POSITION) return@setOnClickListener
-                val prev = expandedPosition
-                expandedPosition = if (prev == pos) -1 else pos
-                if (prev != -1) notifyItemChanged(prev)
-                notifyItemChanged(pos)
+                if (isSelectionMode) {
+                    toggleSelection(contact.contactId)
+                } else {
+                    val pos = adapterPosition
+                    if (pos == RecyclerView.NO_POSITION) return@setOnClickListener
+                    val prev = expandedPosition
+                    expandedPosition = if (prev == pos) -1 else pos
+                    if (prev != -1) notifyItemChanged(prev)
+                    notifyItemChanged(pos)
+                }
             }
 
             // Sub-action buttons — all present in the XML
@@ -167,12 +211,23 @@ class ContactsAdapter : ListAdapter<ContactListItemEnhanced, RecyclerView.ViewHo
             binding.videoCallImg.setOnClickListener { onVideoCallClick?.invoke(contact) }
             binding.informationImg.setOnClickListener { onInformationClick?.invoke(contact) }
 
-            // FIX: editImg does NOT exist in item_contact.xml.
-            // Removed the try/catch hack entirely — onEditClick can be triggered
-            // via the informationImg (info screen) or long-press instead.
             binding.root.setOnLongClickListener {
-                onEditClick?.invoke(contact)
-                true
+                if (!isSelectionMode) {
+                    isSelectionMode = true
+                    toggleSelection(contact.contactId)
+                    true
+                } else {
+                    false
+                }
+            }
+        }
+
+        private fun toggleSelection(id: String) {
+            if (selectedIds.contains(id)) selectedIds.remove(id) else selectedIds.add(id)
+            notifyItemChanged(adapterPosition)
+            onSelectionChanged?.invoke(selectedIds.size)
+            if (selectedIds.isEmpty()) {
+                isSelectionMode = false
             }
         }
 

@@ -1,7 +1,6 @@
 package com.example.contactapp.ViewModel
 
 import android.app.Application
-import android.content.Intent
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -10,77 +9,76 @@ import com.example.contactapp.Model.ContactEnhanced
 import com.example.contactapp.Model.ContactListItemEnhanced
 import com.example.contactapp.Repository.ContactsRepository
 import com.example.contactapp.Utils.ContactCache
+import com.example.contactapp.Utils.RecycleBinManager
 import kotlinx.coroutines.launch
 
 class ContactsViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val repository = ContactsRepository(application)
-    private val cache = ContactCache.getInstance()
+    private val repository       = ContactsRepository(application)
+    private val cache            = ContactCache.getInstance()
+    private val recycleBinManager = RecycleBinManager(application)
 
     private val _contactItems = MutableLiveData<List<ContactListItemEnhanced>>()
     val contactItems: LiveData<List<ContactListItemEnhanced>> = _contactItems
 
-    private var allContacts: List<ContactEnhanced> = emptyList()
+    // FIX: store only the filtered list so search never shows bin contacts
+    private var displayedContacts: List<ContactEnhanced> = emptyList()
 
     private val _isLoading = MutableLiveData(false)
     val isLoading: LiveData<Boolean> = _isLoading
 
     /**
-     * FIX: Load from cache if valid; only hit the content resolver when cache is stale or forced.
-     * This prevents redundant reloads on every onResume.
+     * Load contacts from cache if still valid; force-reload from system DB when asked.
+     * Always filters out contacts that currently live in the Recycle Bin.
      */
     fun loadContacts(force: Boolean = false) {
-        // Use cache if valid and not forced
-        if (!force && cache.isCacheValid()) {
-            val cached = cache.getAllContacts()
-            if (cached.isNotEmpty()) {
-                val sorted = cached.sortedBy { it.name.lowercase() }
-                allContacts = sorted
-                _contactItems.value = buildSectionedList(sorted)
-                return
-            }
-        }
-
         viewModelScope.launch {
-            _isLoading.value = true
-            try {
-                val contacts = repository.getContacts()
-                val sorted = contacts.sortedBy { it.name.lowercase() }
-                allContacts = sorted
-                cache.updateContacts(contacts) // Cache the raw list
-                _contactItems.value = buildSectionedList(sorted)
-            } catch (e: Exception) {
-                e.printStackTrace()
-            } finally {
-                _isLoading.value = false
+            val raw: List<ContactEnhanced> = if (!force && cache.isCacheValid()) {
+                cache.getAllContacts()
+            } else {
+                _isLoading.value = true
+                try {
+                    val fresh = repository.getContacts()
+                    cache.updateContacts(fresh)
+                    fresh
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    emptyList()
+                } finally {
+                    _isLoading.value = false
+                }
             }
+
+            // Always subtract contacts that are sitting in the Recycle Bin (native)
+            val deletedIds = recycleBinManager.getDeletedContacts().map { it.contactId }.toSet()
+            val filtered   = raw
+                .filter { it.contactId !in deletedIds }
+                .sortedBy  { it.name.lowercase() }
+
+            displayedContacts = filtered          // search operates on this
+            _contactItems.value = buildSectionedList(filtered)
         }
     }
 
     /**
-     * Transforms a flat list of contacts into a sectioned list with headers.
-     * Structure: Favorites → Groups → A-Z alphabetical
+     * Sectioned list: Favourites → Groups placeholder → A-Z letters
      */
     private fun buildSectionedList(contacts: List<ContactEnhanced>): List<ContactListItemEnhanced> {
         val list = mutableListOf<ContactListItemEnhanced>()
 
-        // 1. Favorites
         val favorites = contacts.filter { it.isFavorite }
         if (favorites.isNotEmpty()) {
             list.add(ContactListItemEnhanced.Header("Favourites", isFavorite = true))
             favorites.forEach { list.add(ContactListItemEnhanced.ContactItem(it)) }
         }
 
-        // 2. Groups
         list.add(ContactListItemEnhanced.Header("Groups"))
         list.add(ContactListItemEnhanced.GroupsItem)
 
-        // 3. A-Z
         var currentLetter: Char? = null
         contacts.forEach { contact ->
             val firstChar = contact.name.firstOrNull()?.uppercaseChar() ?: '#'
             val groupChar = if (firstChar.isLetter()) firstChar else '#'
-
             if (groupChar != currentLetter) {
                 currentLetter = groupChar
                 list.add(ContactListItemEnhanced.Header(groupChar.toString()))
@@ -91,15 +89,12 @@ class ContactsViewModel(application: Application) : AndroidViewModel(application
         return list
     }
 
-    /**
-     * Filter contacts by search query.
-     * When empty, restores full sectioned list.
-     */
+    /** Live search — operates only on the already-filtered (non-bin) list. */
     fun searchContacts(query: String) {
         if (query.isBlank()) {
-            _contactItems.value = buildSectionedList(allContacts)
+            _contactItems.value = buildSectionedList(displayedContacts)
         } else {
-            val filtered = allContacts.filter { contact ->
+            val filtered = displayedContacts.filter { contact ->
                 contact.name.contains(query, ignoreCase = true) ||
                         contact.phoneNumber.contains(query) ||
                         contact.additionalPhones.any { it.contains(query) }
@@ -108,27 +103,44 @@ class ContactsViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    /**
-     * Toggle favorite and force-reload contacts (invalidates cache).
-     */
     fun toggleFavorite(contactId: String, isCurrentlyFavorite: Boolean) {
         viewModelScope.launch {
-            val success = repository.toggleFavorite(contactId, !isCurrentlyFavorite)
-            if (success) {
+            if (repository.toggleFavorite(contactId, !isCurrentlyFavorite)) {
                 cache.invalidate()
                 loadContacts(force = true)
             }
         }
     }
 
-    /** Invalidate cache so next loadContacts() fetches fresh data. */
-    fun invalidateCache() {
-        cache.invalidate()
+    fun invalidateCache() { cache.invalidate() }
+
+    /**
+     * SOFT DELETE — called from ContactsFragment.
+     *
+     * Saves full contact data to Recycle Bin (Room DB) so it can be restored
+     * or permanently deleted later.  The contact is intentionally left in the
+     * Android system DB at this point — it is simply hidden by the filter in
+     * loadContacts().  Actual system deletion happens in permanentlyDelete().
+     */
+    fun deleteSelectedContacts(contactIds: List<String>, onResult: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                // System native deletion (sync adapters will mark DELETED=1)
+                val isSuccess = repository.deleteContacts(contactIds)
+                
+                if (isSuccess) {
+                    // Invalidate cache so the next load does not serve stale data (and honors the DELETED flag)
+                    cache.invalidate()
+                    loadContacts(force = true)
+                }
+                onResult(isSuccess)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                onResult(false)
+            } finally {
+                _isLoading.value = false
+            }
+        }
     }
-//
-//    fun getAddContactIntent(prefillNumber: String? = null): Intent =
-//        repository.addContactIntent(prefillNumber)
-//
-//    fun getEditContactIntent(contactId: String): Intent =
-//        repository.editContactIntent(contactId)
 }

@@ -8,19 +8,26 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import android.app.role.RoleManager
+import android.content.Context
+import android.content.Intent
+import android.telecom.TelecomManager
 import com.example.contactapp.Adapter.ViewPagerAdapter
 import com.example.contactapp.databinding.ActivityMainBinding
 import com.google.android.material.tabs.TabLayoutMediator
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
+
+
+
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
             val allGranted = permissions.values.all { it }
             if (allGranted) {
                 Toast.makeText(this, "All Permissions Granted", Toast.LENGTH_SHORT).show()
             } else {
-                Toast.makeText(this, "Some permissions were denied", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Some permissions were denied. Dialer may not fully function.", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -32,6 +39,8 @@ class MainActivity : AppCompatActivity() {
         setupViewPager()
         checkPermission()
     }
+
+
 
     private fun setupViewPager() {
         val adapter = ViewPagerAdapter(this)

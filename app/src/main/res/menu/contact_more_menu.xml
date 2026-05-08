@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/menu_edit"
+        android:title="Edit" />
+
+    <item
+        android:id="@+id/menu_manage_contacts"
+        android:title="Manage contacts" />
+
+    <item
+        android:id="@+id/menu_recycle_bin"
+        android:title="Recycle bin" />
+
+    <item
+        android:id="@+id/menu_contacts_settings"
+        android:title="Contacts settings" />
+
+    <item
+        android:id="@+id/menu_settings"
+        android:title="Settings" />
+
+</menu>

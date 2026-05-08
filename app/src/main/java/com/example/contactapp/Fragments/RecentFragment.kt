@@ -132,23 +132,48 @@ class RecentFragment : Fragment() {
 
     // ─── Delete ──────────────────────────────────────────────────────────────────
 
+    private val deletePermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            val selected = adapter.selectedIds.toSet()
+            if (selected.isNotEmpty()) {
+                executeDelete(selected)
+            }
+        } else {
+            Toast.makeText(requireContext(), "Permission required to delete call logs", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     private fun confirmAndDelete(ids: Set<String>) {
         AlertDialog.Builder(requireContext())
             .setTitle("Delete Call Logs")
             .setMessage("Delete ${ids.size} selected call log(s)?")
             .setPositiveButton("Delete") { _, _ ->
-                viewModel.deleteCallLogs(ids) { success ->
-                    if (success) {
-                        // Update adapter list in-place — no full reload needed
-                        adapter.removeItemsByIdAndExitSelection(ids)
-                        hideSelectionToolbar()
-                    } else {
-                        Toast.makeText(requireContext(), "Delete failed", Toast.LENGTH_SHORT).show()
-                    }
+                if (ContextCompat.checkSelfPermission(
+                        requireContext(),
+                        Manifest.permission.WRITE_CALL_LOG
+                    ) == PackageManager.PERMISSION_GRANTED
+                ) {
+                    executeDelete(ids)
+                } else {
+                    deletePermissionLauncher.launch(Manifest.permission.WRITE_CALL_LOG)
                 }
             }
             .setNegativeButton("Cancel", null)
             .show()
+    }
+
+    private fun executeDelete(ids: Set<String>) {
+        viewModel.deleteCallLogs(ids) { success ->
+            if (success) {
+                // Update adapter list in-place — no full reload needed
+                adapter.removeItemsByIdAndExitSelection(ids)
+                hideSelectionToolbar()
+            } else {
+                Toast.makeText(requireContext(), "Delete failed", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     // ─── Swipe to refresh ────────────────────────────────────────────────────────

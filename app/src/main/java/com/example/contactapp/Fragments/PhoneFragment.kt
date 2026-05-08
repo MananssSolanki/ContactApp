@@ -154,9 +154,10 @@ class PhoneFragment : Fragment() {
             return
         }
         try {
-            val telecomManager = requireContext().getSystemService(TelecomManager::class.java)
-            val uri = Uri.fromParts("tel", number, null)
-            telecomManager.placeCall(uri, Bundle())
+            val intent = Intent(Intent.ACTION_CALL).apply {
+                data = Uri.fromParts("tel", number, null)
+            }
+            startActivity(intent)
         } catch (e: Exception) {
             Toast.makeText(requireContext(), "Failed to make call: ${e.message}", Toast.LENGTH_SHORT).show()
         }

@@ -91,6 +91,7 @@ class AddContactActivity : AppCompatActivity() {
             b.ivNameArrow.rotation = if (show) 180f else 0f
         }
 
+
         b.btnAddPhone.setOnClickListener        { addPhoneRow() }
         b.btnAddEmail.setOnClickListener        { addEmailRow() }
         b.btnAddAddress.setOnClickListener      { addAddressRow() }
@@ -179,7 +180,14 @@ class AddContactActivity : AppCompatActivity() {
             b.ivAvatar.setImageResource(R.drawable.ic_launcher_foreground)
         }
 
-        if (c.phones.isEmpty()) addPhoneRow() else c.phones.forEach { addPhoneRow(it.number, it.typeLabel) }
+
+
+        if (c.phones.isEmpty()) {
+            addPhoneRow()
+        } else {
+            c.phones.distinctBy { it.number.replace(Regex("[^0-9+]"), "") }
+                .forEach { addPhoneRow(it.number, it.typeLabel) }
+        }
         if (c.emails.isEmpty()) addEmailRow() else c.emails.forEach { addEmailRow(it.address, it.typeLabel) }
         c.addresses.forEach      { addAddressRow(it) }
         c.importantDates.forEach { addDateRow(it) }

@@ -31,16 +31,6 @@ class SplashScreenActivity : AppCompatActivity() {
         binding = ActivitySplashScreenBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        lifecycleScope.launch {
-            // background work
-            withContext(Dispatchers.IO) {
-                initializeContactsIfNeeded()
-            }
-
-            proceedToNextScreen()
-        }
-
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(
                     this,
@@ -52,8 +42,16 @@ class SplashScreenActivity : AppCompatActivity() {
             }
         }
 
-        proceedToNextScreen()
+        startInitialization()
+    }
 
+    private fun startInitialization() {
+        lifecycleScope.launch {
+            withContext(Dispatchers.IO) {
+                initializeContactsIfNeeded()
+            }
+            proceedToNextScreen()
+        }
     }
 
     private fun proceedToNextScreen() {

@@ -1,8 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="teal_200">#FF03DAC5</color>
     <color name="teal_700">#FF018786</color>
+
     <color name="light_gray">#F5F5F5</color>
+    <color name="samsung_card_white">#F8F9FA</color>
+    <color name="samsung_cyan">#00BCD4</color>
+    <color name="samsung_gray_text">#757575</color>
+    <color name="samsung_light_cyan">#EBFCFE</color>
+
+    <!-- Add these -->
+    <color name="samsung_white_bg">#FFFFFF</color>
+    <color name="samsung_title_text">#111111</color>
+    <color name="samsung_desc_text">#6E6E6E</color>
+    <color name="samsung_tab_active_text">#000000</color>
+    <color name="samsung_tab_inactive_text">#8E8E93</color>
+    <color name="samsung_divider">#E5E5EA</color>
+    <color name="samsung_blue">#0A84FF</color>
+
 </resources>
