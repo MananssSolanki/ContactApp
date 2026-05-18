@@ -180,8 +180,6 @@ class AddContactActivity : AppCompatActivity() {
             b.ivAvatar.setImageResource(R.drawable.ic_launcher_foreground)
         }
 
-
-
         if (c.phones.isEmpty()) {
             addPhoneRow()
         } else {

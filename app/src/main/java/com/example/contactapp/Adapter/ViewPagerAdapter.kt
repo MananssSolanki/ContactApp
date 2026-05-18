@@ -16,10 +16,10 @@ class ViewPagerAdapter(fragmentActivity: FragmentActivity) :
 
     override fun createFragment(position: Int): Fragment {
         return when (position) {
-            0 -> ContactsFragment()
+            0 -> PhoneFragment()
             1 -> RecentFragment()
-            2 -> PhoneFragment()
-            else -> ContactsFragment()
+            2 -> ContactsFragment()
+            else -> PhoneFragment()
         }
     }
 }
