@@ -38,7 +38,8 @@
                 android:layout_weight="1"
                 android:text="Date"
                 android:textColor="#757575"
-                android:textSize="@dimen/_12ssp"/>
+                android:textSize="@dimen/_12ssp"
+        android:fontFamily="@font/tasa"/>
 
             <Spinner
                 android:id="@+id/spinner_type"
@@ -57,7 +58,8 @@
             android:paddingTop="@dimen/_4sdp"
             android:paddingBottom="@dimen/_4sdp"
             android:textColor="@android:color/black"
-            android:textSize="@dimen/_14ssp"/>
+            android:textSize="@dimen/_14ssp"
+        android:fontFamily="@font/tasa"/>
 
         <View
             android:layout_width="match_parent"

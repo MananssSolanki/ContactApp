@@ -11,4 +11,5 @@
     android:layout_marginBottom="@dimen/_5sdp"
     android:textStyle="bold"
     android:textColor="@color/teal_700"
-    android:background="#F5F5F5"/>
+    android:background="#F5F5F5"
+        android:fontFamily="@font/tasa"/>

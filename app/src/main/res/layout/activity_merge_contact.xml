@@ -27,7 +27,7 @@
         android:textColor="@color/samsung_title_text"
         android:textSize="26sp"
         android:textStyle="bold"
-        android:fontFamily="sans-serif-medium" />
+        android:fontFamily="@font/tasa" />
 
     <!-- Description -->
     <TextView
@@ -40,7 +40,8 @@
         android:text="Link contacts with the same phone number, email address, or name and merge them into one entry on your contacts list."
         android:textSize="13sp"
         android:textColor="@color/samsung_desc_text"
-        android:lineSpacingExtra="2dp" />
+        android:lineSpacingExtra="2dp"
+        android:fontFamily="@font/tasa" />
 
     <!-- Pill Tab Bar Container -->
     <LinearLayout
@@ -61,7 +62,8 @@
             android:textSize="13sp"
             android:textStyle="bold"
             android:textColor="@color/samsung_tab_active_text"
-            android:background="@drawable/bg_samsung_tab_active" />
+            android:background="@drawable/bg_samsung_tab_active"
+        android:fontFamily="@font/tasa" />
 
         <TextView
             android:id="@+id/tabEmail"
@@ -72,7 +74,8 @@
             android:gravity="center"
             android:textSize="13sp"
             android:textColor="@color/samsung_tab_inactive_text"
-            android:background="@drawable/bg_samsung_tab_inactive" />
+            android:background="@drawable/bg_samsung_tab_inactive"
+        android:fontFamily="@font/tasa" />
 
         <TextView
             android:id="@+id/tabName"
@@ -83,7 +86,8 @@
             android:gravity="center"
             android:textSize="13sp"
             android:textColor="@color/samsung_tab_inactive_text"
-            android:background="@drawable/bg_samsung_tab_inactive" />
+            android:background="@drawable/bg_samsung_tab_inactive"
+        android:fontFamily="@font/tasa" />
 
     </LinearLayout>
 
@@ -107,7 +111,8 @@
             android:id="@+id/checkboxSelectAll"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:buttonTint="@color/samsung_blue" />
+            android:buttonTint="@color/samsung_blue"
+        android:fontFamily="@font/tasa" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -115,7 +120,8 @@
             android:text="Select all"
             android:textSize="15sp"
             android:textColor="@color/samsung_title_text"
-            android:layout_marginStart="6dp" />
+            android:layout_marginStart="6dp"
+        android:fontFamily="@font/tasa" />
     </LinearLayout>
 
     <!-- Progress bar -->
@@ -136,7 +142,8 @@
         android:gravity="center"
         android:textSize="14sp"
         android:textColor="@color/samsung_gray_text"
-        android:visibility="gone" />
+        android:visibility="gone"
+        android:fontFamily="@font/tasa" />
 
     <!-- Duplicate groups list -->
     <androidx.recyclerview.widget.RecyclerView
@@ -185,7 +192,8 @@
                 android:textColor="@color/white"
                 android:textSize="14sp"
                 android:textStyle="bold"
-                android:layout_marginStart="8dp" />
+                android:layout_marginStart="8dp"
+        android:fontFamily="@font/tasa" />
         </LinearLayout>
     </LinearLayout>
 

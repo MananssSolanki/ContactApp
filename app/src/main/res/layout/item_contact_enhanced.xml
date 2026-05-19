@@ -47,7 +47,8 @@
                     android:textColor="@android:color/white"
                     android:textSize="24sp"
                     android:textStyle="bold"
-                    android:background="@drawable/circle_background"/>
+                    android:background="@drawable/circle_background"
+        android:fontFamily="@font/tasa"/>
 
                 <ImageView
                     android:id="@+id/ivContactPhoto"
@@ -74,7 +75,8 @@
                 android:ellipsize="end"
                 app:layout_constraintStart_toEndOf="@id/contactPhotoFrame"
                 app:layout_constraintEnd_toStartOf="@id/ivFavorite"
-                app:layout_constraintTop_toTopOf="@id/contactPhotoFrame"/>
+                app:layout_constraintTop_toTopOf="@id/contactPhotoFrame"
+        android:fontFamily="@font/tasa"/>
 
             <!-- Phone Number -->
             <TextView
@@ -91,7 +93,8 @@
                 android:ellipsize="end"
                 app:layout_constraintStart_toEndOf="@id/contactPhotoFrame"
                 app:layout_constraintEnd_toStartOf="@id/ivFavorite"
-                app:layout_constraintTop_toBottomOf="@id/tvContactName"/>
+                app:layout_constraintTop_toBottomOf="@id/tvContactName"
+        android:fontFamily="@font/tasa"/>
 
             <!-- Account Badge -->
             <TextView
@@ -110,7 +113,8 @@
                 android:paddingBottom="2dp"
                 android:visibility="gone"
                 app:layout_constraintStart_toEndOf="@id/contactPhotoFrame"
-                app:layout_constraintTop_toBottomOf="@id/tvPhoneNumber"/>
+                app:layout_constraintTop_toBottomOf="@id/tvPhoneNumber"
+        android:fontFamily="@font/tasa"/>
 
             <!-- Favorite Icon -->
             <ImageView

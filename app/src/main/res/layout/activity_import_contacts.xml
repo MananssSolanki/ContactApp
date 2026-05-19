@@ -32,7 +32,8 @@
             android:text="Import contacts"
             android:textColor="@color/black"
             android:textSize="20sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+        android:fontFamily="@font/tasa" />
     </RelativeLayout>
 
     <ViewAnimator
@@ -60,7 +61,8 @@
                     android:text="From"
                     android:textColor="@color/black"
                     android:textSize="22sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+        android:fontFamily="@font/tasa" />
 
                 <LinearLayout
                     android:id="@+id/layoutFromSelection"
@@ -77,7 +79,8 @@
                         android:paddingBottom="12dp"
                         android:text="Select where to import your contacts from."
                         android:textColor="#757575"
-                        android:textSize="14sp" />
+                        android:textSize="14sp"
+        android:fontFamily="@font/tasa" />
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/rvFromAccounts"
@@ -101,7 +104,8 @@
                     android:text="To"
                     android:textColor="#BFBFBF"
                     android:textSize="22sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+        android:fontFamily="@font/tasa" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -116,7 +120,8 @@
                         android:layout_height="wrap_content"
                         android:text="Select where to import these contacts to."
                         android:textColor="#BFBFBF"
-                        android:textSize="14sp" />
+                        android:textSize="14sp"
+        android:fontFamily="@font/tasa" />
                 </LinearLayout>
 
             </LinearLayout>
@@ -137,7 +142,8 @@
                 <CheckBox
                     android:id="@+id/cbSelectAll"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+        android:fontFamily="@font/tasa" />
 
                 <TextView
                     android:id="@+id/tvSelectionCount"
@@ -147,7 +153,8 @@
                     android:text="0 selected"
                     android:textColor="@color/black"
                     android:textSize="18sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+        android:fontFamily="@font/tasa" />
             </LinearLayout>
 
             <androidx.recyclerview.widget.RecyclerView
@@ -165,7 +172,8 @@
                 android:text="Done"
                 android:textAllCaps="false"
                 android:textColor="@color/white"
-                android:textSize="16sp" />
+                android:textSize="16sp"
+        android:fontFamily="@font/tasa" />
         </LinearLayout>
 
         <!-- Step 3: TO Selection -->
@@ -185,7 +193,8 @@
                     android:text="From"
                     android:textColor="#BFBFBF"
                     android:textSize="22sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+        android:fontFamily="@font/tasa" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -216,7 +225,8 @@
                             android:text="SIM 2"
                             android:textColor="@color/black"
                             android:textSize="16sp"
-                            android:textStyle="bold" />
+                            android:textStyle="bold"
+        android:fontFamily="@font/tasa" />
 
                         <TextView
                             android:id="@+id/tvSelectedFromCount"
@@ -224,7 +234,8 @@
                             android:layout_height="wrap_content"
                             android:text="6 contacts"
                             android:textColor="#00BCD4"
-                            android:textSize="13sp" />
+                            android:textSize="13sp"
+        android:fontFamily="@font/tasa" />
                     </LinearLayout>
                 </LinearLayout>
 
@@ -243,7 +254,8 @@
                     android:text="To"
                     android:textColor="@color/black"
                     android:textSize="22sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+        android:fontFamily="@font/tasa" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -259,7 +271,8 @@
                         android:paddingBottom="12dp"
                         android:text="Select where to import these contacts to."
                         android:textColor="#757575"
-                        android:textSize="14sp" />
+                        android:textSize="14sp"
+        android:fontFamily="@font/tasa" />
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/rvToAccounts"
@@ -278,7 +291,8 @@
                     android:textAllCaps="false"
                     android:textColor="@color/white"
                     android:textSize="16sp"
-                    android:visibility="gone" />
+                    android:visibility="gone"
+        android:fontFamily="@font/tasa" />
 
             </LinearLayout>
         </ScrollView>
@@ -299,7 +313,8 @@
                 android:text="Contacts added to your Google"
                 android:textColor="@color/black"
                 android:textSize="24sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+        android:fontFamily="@font/tasa" />
 
             <RelativeLayout
                 android:layout_width="160dp"
@@ -329,7 +344,8 @@
                 android:text="OK"
                 android:textAllCaps="false"
                 android:textColor="@color/white"
-                android:textSize="16sp" />
+                android:textSize="16sp"
+        android:fontFamily="@font/tasa" />
 
         </LinearLayout>
 

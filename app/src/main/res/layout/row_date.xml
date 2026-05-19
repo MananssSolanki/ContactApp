@@ -21,7 +21,8 @@
             android:drawableTint="#1E90FF"
             android:text="Birthday"
             android:textColor="#1E90FF"
-            android:textSize="@dimen/_14ssp" />
+            android:textSize="@dimen/_14ssp"
+        android:fontFamily="@font/tasa" />
 
         <Button
             android:id="@+id/btnPickDate"
@@ -29,7 +30,8 @@
             android:layout_height="@dimen/_36sdp"
             android:backgroundTint="#EEEEEE"
             android:text="Date"
-            android:textColor="#333333" />
+            android:textColor="#333333"
+        android:fontFamily="@font/tasa" />
 
         <ImageButton
             android:id="@+id/btnRemoveDate"

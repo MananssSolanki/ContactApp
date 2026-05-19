@@ -30,7 +30,8 @@
             android:text="SIM 2"
             android:textColor="@color/black"
             android:textSize="16sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+        android:fontFamily="@font/tasa" />
 
         <TextView
             android:id="@+id/tvAccountSubtitle"
@@ -39,7 +40,8 @@
             android:text="6 contacts"
             android:textColor="#757575"
             android:textSize="13sp"
-            android:visibility="gone" />
+            android:visibility="gone"
+        android:fontFamily="@font/tasa" />
     </LinearLayout>
 
     <RadioButton
@@ -48,6 +50,7 @@
         android:layout_height="wrap_content"
         android:clickable="false"
         android:focusable="false"
-        android:visibility="gone" />
+        android:visibility="gone"
+        android:fontFamily="@font/tasa" />
 
 </LinearLayout>

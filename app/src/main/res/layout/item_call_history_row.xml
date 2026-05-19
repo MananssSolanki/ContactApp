@@ -1,142 +1,126 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/root_layout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
-    android:id="@+id/root_layout">
+    android:layout_marginHorizontal="8dp"
+    android:layout_marginVertical="6dp"
+    app:cardBackgroundColor="@color/brand_surface"
+    app:cardCornerRadius="22dp"
+    app:cardElevation="1dp"
+    app:strokeColor="@color/brand_border"
+    app:strokeWidth="1dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingStart="@dimen/_16sdp"
-        android:paddingEnd="@dimen/_16sdp"
-        android:paddingTop="@dimen/_12sdp"
-        android:paddingBottom="@dimen/_12sdp"
-        android:gravity="center_vertical">
+        android:padding="18dp">
 
-        <!-- Contact Photo -->
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/iv_contact_photo"
-            android:layout_width="@dimen/_40sdp"
-            android:layout_height="@dimen/_40sdp"
-            android:layout_marginEnd="@dimen/_12sdp"
-            android:src="@drawable/ic_launcher_foreground"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="12dp"
             android:scaleType="centerCrop"
-            app:shapeAppearanceOverlay="@style/ShapeAppearance.MaterialComponents.SmallComponent"
-            android:visibility="visible"/>
+            android:src="@drawable/ic_launcher_foreground"
+            android:visibility="visible"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full" />
 
-        <!-- Multi-select Checkbox -->
         <CheckBox
             android:id="@+id/cb_select"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/_8sdp"
-            android:visibility="gone"
+            android:layout_marginEnd="8dp"
             android:clickable="false"
-            android:focusable="false"/>
+            android:focusable="false"
+            android:visibility="gone" />
 
-        <!-- Call Type Icon -->
         <ImageView
             android:id="@+id/iv_call_type"
-            android:layout_width="@dimen/_24sdp"
-            android:layout_height="@dimen/_24sdp"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
             android:src="@android:drawable/sym_call_incoming"
-            tools:tint="@color/teal_200"/>
+            tools:tint="@color/brand_primary" />
 
-        <!-- Text Container -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="14dp"
+            android:layout_marginEnd="8dp"
             android:layout_weight="1"
-            android:orientation="vertical"
-            android:layout_marginStart="@dimen/_16sdp"
-            android:layout_marginEnd="@dimen/_8sdp">
+            android:orientation="vertical">
 
-            <!-- Style 0: Time -->
             <TextView
                 android:id="@+id/tv_time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="8:53 pm"
-                android:textSize="@dimen/_14ssp"
-                android:textStyle="bold"
-                android:textColor="@android:color/black"
-                android:visibility="gone"/>
+                android:textColor="@color/brand_text_primary"
+                android:visibility="gone"
+                style="@style/Widget.ContactApp.ListTitle" />
 
-            <!-- Style 1: Contact Name -->
             <TextView
                 android:id="@+id/tv_contact_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Contact Name"
-                android:textSize="@dimen/_16ssp"
-                android:textStyle="bold"
-                android:textColor="@android:color/black"
-                android:maxLines="1"
                 android:ellipsize="end"
-                android:visibility="gone"/>
+                android:maxLines="1"
+                android:text="Contact Name"
+                android:visibility="gone"
+                style="@style/Widget.ContactApp.ListTitle" />
 
-            <!-- Style 1: Phone Number -->
             <TextView
                 android:id="@+id/tv_phone_number"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="+1 234 567 8900"
-                android:textSize="@dimen/_13ssp"
-                android:textColor="@android:color/darker_gray"
-                android:maxLines="1"
+                android:layout_marginTop="4dp"
                 android:ellipsize="end"
-                android:layout_marginTop="@dimen/_2sdp"
-                android:visibility="gone"/>
+                android:maxLines="1"
+                android:text="+1 234 567 8900"
+                android:visibility="gone"
+                style="@style/Widget.ContactApp.ListBody" />
 
-            <!-- Style 0: Status & Duration -->
             <TextView
                 android:id="@+id/tv_status_duration"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
                 android:text="Incoming call, 0 mins 8 secs"
-                android:textSize="@dimen/_12ssp"
-                android:textColor="#757575"
-                android:layout_marginTop="@dimen/_2sdp"
-                android:visibility="gone"/>
+                android:visibility="gone"
+                style="@style/Widget.ContactApp.Caption" />
 
-            <!-- Style 1: Time & Duration -->
             <TextView
                 android:id="@+id/tv_time_and_duration"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
                 android:text="10:30 AM • 2:45"
-                android:textSize="@dimen/_12ssp"
-                android:textColor="@android:color/darker_gray"
-                android:maxLines="1"
-                android:layout_marginTop="@dimen/_2sdp"
-                android:visibility="gone"/>
-
+                android:visibility="gone"
+                style="@style/Widget.ContactApp.Caption" />
         </LinearLayout>
 
-        <!-- Style 1: Call Button -->
         <ImageView
             android:id="@+id/btn_call"
-            android:layout_width="@dimen/_32sdp"
-            android:layout_height="@dimen/_32sdp"
-            android:src="@android:drawable/ic_menu_call"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:padding="@dimen/_6sdp"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:background="@drawable/bg_icon_button"
             android:contentDescription="Call"
-            tools:tint="@color/teal_700"
-            android:visibility="gone"/>
-
+            android:padding="10dp"
+            android:src="@android:drawable/ic_menu_call"
+            android:visibility="gone"
+            app:tint="@color/brand_primary" />
     </LinearLayout>
 
-    <!-- Divider -->
     <View
         android:id="@+id/divider"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/_1sdp"
-        android:background="#E0E0E0"
-        android:layout_marginStart="@dimen/_56sdp"/>
+        android:layout_height="1dp"
+        android:layout_marginStart="74dp"
+        android:background="@drawable/divider_premium"
+        android:visibility="gone" />
 
-</LinearLayout>
+</com.google.android.material.card.MaterialCardView>

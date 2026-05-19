@@ -21,7 +21,8 @@
             android:drawableTint="#1E90FF"
             android:text="Home"
             android:textColor="#1E90FF"
-            android:textSize="@dimen/_14ssp" />
+            android:textSize="@dimen/_14ssp"
+        android:fontFamily="@font/tasa" />
 
         <ImageButton
             android:id="@+id/btnRemoveAddress"
@@ -42,7 +43,8 @@
         android:hint="Street"
         android:textColor="#333333"
         android:textColorHint="#aaaaaa"
-        android:textSize="@dimen/_15ssp" />
+        android:textSize="@dimen/_15ssp"
+        android:fontFamily="@font/tasa" />
 
     <View
         android:layout_width="match_parent"
@@ -65,7 +67,8 @@
             android:hint="City"
             android:textColor="#333333"
             android:textColorHint="#aaaaaa"
-            android:textSize="@dimen/_15ssp" />
+            android:textSize="@dimen/_15ssp"
+        android:fontFamily="@font/tasa" />
 
         <ImageView
             android:layout_width="@dimen/_24sdp"
@@ -90,7 +93,8 @@
         android:hint="State"
         android:textColor="#333333"
         android:textColorHint="#aaaaaa"
-        android:textSize="@dimen/_15ssp" />
+        android:textSize="@dimen/_15ssp"
+        android:fontFamily="@font/tasa" />
 
     <View
         android:layout_width="match_parent"
@@ -107,7 +111,8 @@
         android:hint="Postcode"
         android:textColor="#333333"
         android:textColorHint="#aaaaaa"
-        android:textSize="@dimen/_15ssp" />
+        android:textSize="@dimen/_15ssp"
+        android:fontFamily="@font/tasa" />
 
     <View
         android:layout_width="match_parent"
@@ -123,7 +128,8 @@
         android:hint="Country"
         android:textColor="#333333"
         android:textColorHint="#aaaaaa"
-        android:textSize="@dimen/_15ssp" />
+        android:textSize="@dimen/_15ssp"
+        android:fontFamily="@font/tasa" />
 
     <View
         android:layout_width="match_parent"

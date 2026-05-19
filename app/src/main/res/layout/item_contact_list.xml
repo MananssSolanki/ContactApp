@@ -42,7 +42,8 @@
             app:layout_constraintStart_toEndOf="@+id/ivContactPhoto"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_chainStyle="packed"
-            tools:text="John Doe" />
+            tools:text="John Doe"
+        android:fontFamily="@font/tasa" />
 
         <TextView
             android:id="@+id/tvContactNumber"
@@ -58,7 +59,8 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/ivContactPhoto"
             app:layout_constraintTop_toBottomOf="@+id/tvContactName"
-            tools:text="+1 234 567 8900" />
+            tools:text="+1 234 567 8900"
+        android:fontFamily="@font/tasa" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -3,86 +3,88 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@color/samsung_white_bg">
+    android:background="@color/brand_background"
+    android:orientation="vertical">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="@color/samsung_white_bg"
+        android:layout_height="wrap_content"
+        android:background="@color/brand_background"
+        android:minHeight="72dp"
+        android:paddingStart="24dp"
+        android:paddingTop="12dp"
+        android:paddingEnd="24dp"
+        android:paddingBottom="12dp"
         app:navigationIcon="@drawable/ic_arrow_back"
-        app:navigationIconTint="@color/black"
+        app:navigationIconTint="@color/brand_text_primary"
         app:title="Recycle bin"
-        app:titleTextColor="@color/black" />
+        app:titleTextColor="@color/brand_text_primary" />
 
-    <!-- Info banner -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingStart="24dp"
-        android:paddingEnd="24dp"
-        android:paddingTop="12dp"
-        android:paddingBottom="12dp"
-        android:text="Contacts in the recycle bin will be permanently deleted after 30 days."
-        android:textSize="13sp"
-        android:textColor="#757575"
-        android:background="#F8F8F8" />
-
-    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#EEEEEE" />
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="24dp"
+        android:background="@drawable/bg_card_soft"
+        android:padding="16dp"
+        android:text="Contacts in the recycle bin are permanently deleted after 30 days."
+        style="@style/Widget.ContactApp.SectionBody" />
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:paddingStart="16dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="16dp">
 
-        <!-- Empty state -->
         <LinearLayout
             android:id="@+id/layoutEmpty"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="@drawable/bg_empty_state_panel"
             android:gravity="center"
             android:orientation="vertical"
+            android:padding="24dp"
             android:visibility="gone">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="No contacts"
-                android:textSize="18sp"
-                android:textColor="#9E9E9E" />
+                android:text="No contacts in recycle bin"
+                style="@style/Widget.ContactApp.SectionTitle" />
         </LinearLayout>
 
-        <!-- Contacts list -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:paddingTop="8dp"
-            android:clipToPadding="false" />
+            android:clipToPadding="false"
+            android:paddingBottom="8dp" />
     </FrameLayout>
 
-    <!-- Bottom Actions -->
     <LinearLayout
         android:id="@+id/layoutBottomActions"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:gravity="center"
-        android:padding="16dp"
-        android:background="@color/samsung_white_bg">
+        android:orientation="horizontal"
+        android:paddingStart="24dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="24dp"
+        android:paddingBottom="24dp">
 
         <TextView
             android:id="@+id/btnEmptyBin"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Empty"
-            android:textSize="16sp"
-            android:textColor="#D32F2F"
-            android:textStyle="bold"
-            android:padding="8dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:background="?attr/selectableItemBackground" />
+            android:background="@drawable/bg_button_dark"
+            android:gravity="center"
+            android:padding="16dp"
+            android:text="Empty recycle bin"
+            android:textColor="@color/brand_text_inverse"
+            style="@style/TextAppearance.ContactApp.LabelLarge" />
     </LinearLayout>
 
 </LinearLayout>

@@ -22,7 +22,8 @@
             android:inputType="textUri"
             android:textColor="#333333"
             android:textColorHint="#aaaaaa"
-            android:textSize="@dimen/_16ssp" />
+            android:textSize="@dimen/_16ssp"
+        android:fontFamily="@font/tasa" />
 
         <ImageButton
             android:id="@+id/btnRemoveWebsite"

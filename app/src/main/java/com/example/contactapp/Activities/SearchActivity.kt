@@ -14,14 +14,14 @@ import android.view.inputmethod.EditorInfo
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.contactapp.Adapter.SearchAdapter
+import com.example.contactapp.EdgeToEdgeActivity
 import com.example.contactapp.ViewModel.SearchViewModel
 import com.example.contactapp.databinding.ActivitySearchBinding
 
-class SearchActivity : AppCompatActivity() {
+class SearchActivity : EdgeToEdgeActivity() {
 
     private lateinit var b: ActivitySearchBinding
     private val viewModel: SearchViewModel by viewModels()

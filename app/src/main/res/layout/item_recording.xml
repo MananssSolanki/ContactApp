@@ -41,7 +41,8 @@
                 android:text="Recording Name"
                 android:textColor="@color/black"
                 android:textSize="@dimen/_14ssp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+        android:fontFamily="@font/tasa" />
 
             <TextView
                 android:id="@+id/tvRecordingMeta"
@@ -50,7 +51,8 @@
                 android:layout_marginTop="2dp"
                 android:text="00:00 · 0 KB"
                 android:textColor="#888888"
-                android:textSize="@dimen/_12ssp" />
+                android:textSize="@dimen/_12ssp"
+        android:fontFamily="@font/tasa" />
         </LinearLayout>
 
         <ImageButton

@@ -5,16 +5,16 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.contactapp.Adapter.RecycleBinAdapter
+import com.example.contactapp.EdgeToEdgeActivity
 import com.example.contactapp.Model.DeletedContact
 import com.example.contactapp.Utils.RecycleBinManager
 import com.example.contactapp.databinding.ActivityRecycleBinBinding
 import kotlinx.coroutines.launch
 
-class RecycleBinActivity : AppCompatActivity() {
+class RecycleBinActivity : EdgeToEdgeActivity() {
 
     private lateinit var binding: ActivityRecycleBinBinding
     private lateinit var adapter: RecycleBinAdapter

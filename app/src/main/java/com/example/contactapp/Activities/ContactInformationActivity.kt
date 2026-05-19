@@ -11,11 +11,11 @@ import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresPermission
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.example.contactapp.Adapter.CallLogAdapter
+import com.example.contactapp.EdgeToEdgeActivity
 import com.example.contactapp.Model.ContactEnhanced
 import com.example.contactapp.R
 import com.example.contactapp.Repository.BlockedNumberRepository
@@ -26,7 +26,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class ContactInformationActivity : AppCompatActivity() {
+class ContactInformationActivity : EdgeToEdgeActivity() {
 
     private lateinit var binding: ActivityContactInformationBinding
     private var contact: ContactEnhanced? = null

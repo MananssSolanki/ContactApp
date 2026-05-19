@@ -399,6 +399,22 @@ class CallLogAdapter(
 
     override fun getItemCount(): Int = list.size
 
+    private fun getCallStatus(callType: CallLog.CallType): Pair<String, Int> {
+        return when (callType) {
+            CallLog.CallType.INCOMING -> "Incoming call" to android.R.drawable.sym_call_incoming
+            CallLog.CallType.OUTGOING -> "Outgoing call" to android.R.drawable.sym_call_outgoing
+            CallLog.CallType.MISSED -> "Missed call" to android.R.drawable.sym_call_missed
+        }
+    }
+
+    private fun getCallTintColor(callType: CallLog.CallType): Int {
+        return if (callType == CallLog.CallType.MISSED) {
+            Color.RED
+        } else {
+            Color.parseColor("#2196F3")
+        }
+    }
+
     inner class HeaderViewHolder(private val binding: ItemCallLogHeaderBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(item: CallLogListItem.Header) {
@@ -434,15 +450,9 @@ class CallLogAdapter(
             }
 
             // Call type icon & color
-            val (statusText, iconRes) = when (callLog.callType) {
-                CallLog.CallType.INCOMING -> "Incoming call" to android.R.drawable.sym_call_incoming
-                CallLog.CallType.OUTGOING -> "Outgoing call" to android.R.drawable.sym_call_outgoing
-                CallLog.CallType.MISSED   -> "Missed call"   to android.R.drawable.sym_call_missed
-            }
+            val (statusText, iconRes) = getCallStatus(callLog.callType)
             binding.ivCallType.setImageResource(iconRes)
-            val tintColor = if (callLog.callType == CallLog.CallType.MISSED)
-                Color.RED else Color.parseColor("#2196F3")
-            binding.ivCallType.setColorFilter(tintColor)
+            binding.ivCallType.setColorFilter(getCallTintColor(callLog.callType))
 
             if (style == 0) {
                 // History style
@@ -477,8 +487,14 @@ class CallLogAdapter(
                 binding.tvContactName.setTextColor(
                     if (callLog.callType == CallLog.CallType.MISSED) Color.RED else Color.BLACK
                 )
-                val durationStr = if (callLog.duration > 0) " • ${callLog.getFormattedDuration()}" else ""
-                binding.tvTimeAndDuration.text = "${callLog.getFormattedTime()}$durationStr"
+                val detailParts = buildList {
+                    add(statusText)
+                    add(callLog.getFormattedTime())
+                    if (callLog.duration > 0) {
+                        add(callLog.getFormattedDuration())
+                    }
+                }
+                binding.tvTimeAndDuration.text = detailParts.joinToString(" - ")
             }
 
             // Click: toggle selection or open detail

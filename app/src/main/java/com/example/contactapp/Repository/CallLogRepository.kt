@@ -58,7 +58,11 @@ class CallLogRepository(private val context: Context) {
 
                     val callType = when (type) {
                         CallLog.Calls.OUTGOING_TYPE -> AppCallLog.CallType.OUTGOING
-                        CallLog.Calls.MISSED_TYPE -> AppCallLog.CallType.MISSED
+                        CallLog.Calls.INCOMING_TYPE -> AppCallLog.CallType.INCOMING
+                        CallLog.Calls.MISSED_TYPE,
+                        CallLog.Calls.REJECTED_TYPE,
+                        CallLog.Calls.BLOCKED_TYPE,
+                        CallLog.Calls.VOICEMAIL_TYPE -> AppCallLog.CallType.MISSED
                         else -> AppCallLog.CallType.INCOMING
                     }
 

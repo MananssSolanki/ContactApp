@@ -44,7 +44,8 @@
                     android:text="Google"
                     android:textColor="#333333"
                     android:textSize="@dimen/_14ssp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+        android:fontFamily="@font/tasa" />
 
                 <TextView
                     android:id="@+id/tvAccountEmail"
@@ -52,7 +53,8 @@
                     android:layout_height="wrap_content"
                     android:text="solankimanan19@gmail.com"
                     android:textColor="#666666"
-                    android:textSize="@dimen/_11ssp" />
+                    android:textSize="@dimen/_11ssp"
+        android:fontFamily="@font/tasa" />
             </LinearLayout>
 
             <ImageView
@@ -121,7 +123,8 @@
                     android:background="@android:color/transparent"
                     android:textSize="@dimen/_16ssp"
                     android:inputType="textPersonName"
-                    android:imeOptions="actionNext" />
+                    android:imeOptions="actionNext"
+        android:fontFamily="@font/tasa" />
 
                 <ImageView
                     android:id="@+id/ivNameArrow"
@@ -148,34 +151,39 @@
                     android:hint="Name prefix" android:textColorHint="#aaaaaa"
                     android:textColor="#333333" android:background="@android:color/transparent"
                     android:textSize="@dimen/_15ssp" android:inputType="textPersonName"
-                    android:layout_marginBottom="@dimen/_12sdp"/>
+                    android:layout_marginBottom="@dimen/_12sdp"
+        android:fontFamily="@font/tasa"/>
 
                 <EditText android:id="@+id/etFirstName"
                     android:layout_width="match_parent" android:layout_height="wrap_content"
                     android:hint="First name" android:textColorHint="#aaaaaa"
                     android:textColor="#333333" android:background="@android:color/transparent"
                     android:textSize="@dimen/_15ssp" android:inputType="textPersonName"
-                    android:layout_marginBottom="@dimen/_12sdp"/>
+                    android:layout_marginBottom="@dimen/_12sdp"
+        android:fontFamily="@font/tasa"/>
 
                 <EditText android:id="@+id/etMiddleName"
                     android:layout_width="match_parent" android:layout_height="wrap_content"
                     android:hint="Middle name" android:textColorHint="#aaaaaa"
                     android:textColor="#333333" android:background="@android:color/transparent"
                     android:textSize="@dimen/_15ssp" android:inputType="textPersonName"
-                    android:layout_marginBottom="@dimen/_12sdp"/>
+                    android:layout_marginBottom="@dimen/_12sdp"
+        android:fontFamily="@font/tasa"/>
 
                 <EditText android:id="@+id/etLastName"
                     android:layout_width="match_parent" android:layout_height="wrap_content"
                     android:hint="Last name" android:textColorHint="#aaaaaa"
                     android:textColor="#333333" android:background="@android:color/transparent"
                     android:textSize="@dimen/_15ssp" android:inputType="textPersonName"
-                    android:layout_marginBottom="@dimen/_12sdp"/>
+                    android:layout_marginBottom="@dimen/_12sdp"
+        android:fontFamily="@font/tasa"/>
 
                 <EditText android:id="@+id/etNameSuffix"
                     android:layout_width="match_parent" android:layout_height="wrap_content"
                     android:hint="Name suffix" android:textColorHint="#aaaaaa"
                     android:textColor="#333333" android:background="@android:color/transparent"
-                    android:textSize="@dimen/_15ssp" android:inputType="textPersonName"/>
+                    android:textSize="@dimen/_15ssp" android:inputType="textPersonName"
+        android:fontFamily="@font/tasa"/>
             </LinearLayout>
         </LinearLayout>
 
@@ -197,7 +205,8 @@
                 android:layout_marginStart="@dimen/_12sdp"
                 android:hint="Phonetic name" android:textColorHint="#aaaaaa"
                 android:textColor="#333333" android:background="@android:color/transparent"
-                android:textSize="@dimen/_16ssp"/>
+                android:textSize="@dimen/_16ssp"
+        android:fontFamily="@font/tasa"/>
         </LinearLayout>
 
         <!-- Nickname -->
@@ -218,7 +227,8 @@
                 android:layout_marginStart="@dimen/_12sdp"
                 android:hint="Nickname" android:textColorHint="#aaaaaa"
                 android:textColor="#333333" android:background="@android:color/transparent"
-                android:textSize="@dimen/_16ssp"/>
+                android:textSize="@dimen/_16ssp"
+        android:fontFamily="@font/tasa"/>
         </LinearLayout>
 
         <!-- ══════════════════════════════════════════
@@ -255,7 +265,8 @@
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                     android:text="Add phone number" android:textColor="#4CAF50"
                     android:layout_marginStart="@dimen/_8sdp" android:textSize="@dimen/_14ssp"
-                    android:id="@+id/tvAddPhone"/>
+                    android:id="@+id/tvAddPhone"
+        android:fontFamily="@font/tasa"/>
             </LinearLayout>
         </LinearLayout>
 
@@ -293,7 +304,8 @@
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                     android:text="Add email" android:textColor="#4CAF50"
                     android:layout_marginStart="@dimen/_8sdp" android:textSize="@dimen/_14ssp"
-                    android:id="@+id/tvAddEmail"/>
+                    android:id="@+id/tvAddEmail"
+        android:fontFamily="@font/tasa"/>
             </LinearLayout>
         </LinearLayout>
 
@@ -320,7 +332,8 @@
                     android:layout_marginStart="@dimen/_12sdp"
                     android:hint="Job title" android:textColorHint="#aaaaaa"
                     android:textColor="#333333" android:background="@android:color/transparent"
-                    android:textSize="@dimen/_16ssp"/>
+                    android:textSize="@dimen/_16ssp"
+        android:fontFamily="@font/tasa"/>
             </LinearLayout>
 
             <View android:layout_width="match_parent" android:layout_height="1dp"
@@ -331,7 +344,8 @@
                 android:layout_marginStart="@dimen/_36sdp"
                 android:hint="Department" android:textColorHint="#aaaaaa"
                 android:textColor="#333333" android:background="@android:color/transparent"
-                android:textSize="@dimen/_16ssp" android:layout_marginBottom="@dimen/_12sdp"/>
+                android:textSize="@dimen/_16ssp" android:layout_marginBottom="@dimen/_12sdp"
+        android:fontFamily="@font/tasa"/>
 
             <View android:layout_width="match_parent" android:layout_height="1dp"
                 android:background="#ddd" android:layout_marginStart="@dimen/_36sdp" android:layout_marginBottom="@dimen/_12sdp"/>
@@ -341,7 +355,8 @@
                 android:layout_marginStart="@dimen/_36sdp"
                 android:hint="Company" android:textColorHint="#aaaaaa"
                 android:textColor="#333333" android:background="@android:color/transparent"
-                android:textSize="@dimen/_16ssp"/>
+                android:textSize="@dimen/_16ssp"
+        android:fontFamily="@font/tasa"/>
         </LinearLayout>
 
         <!-- ══════════════════════════════════════════
@@ -375,7 +390,8 @@
                     android:layout_marginStart="@dimen/_12sdp" android:contentDescription="Add address"/>
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                     android:text="Add address" android:textColor="#4CAF50"
-                    android:layout_marginStart="@dimen/_8sdp" android:textSize="@dimen/_14ssp"/>
+                    android:layout_marginStart="@dimen/_8sdp" android:textSize="@dimen/_14ssp"
+        android:fontFamily="@font/tasa"/>
             </LinearLayout>
         </LinearLayout>
 
@@ -410,7 +426,8 @@
                     android:layout_marginStart="@dimen/_12sdp" android:contentDescription="Add date"/>
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                     android:text="Add important date" android:textColor="#4CAF50"
-                    android:layout_marginStart="@dimen/_8sdp" android:textSize="@dimen/_14ssp"/>
+                    android:layout_marginStart="@dimen/_8sdp" android:textSize="@dimen/_14ssp"
+        android:fontFamily="@font/tasa"/>
             </LinearLayout>
         </LinearLayout>
 
@@ -445,7 +462,8 @@
                     android:layout_marginStart="@dimen/_12sdp" android:contentDescription="Add relationship"/>
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                     android:text="Add relationship" android:textColor="#4CAF50"
-                    android:layout_marginStart="@dimen/_8sdp" android:textSize="@dimen/_14ssp"/>
+                    android:layout_marginStart="@dimen/_8sdp" android:textSize="@dimen/_14ssp"
+        android:fontFamily="@font/tasa"/>
             </LinearLayout>
         </LinearLayout>
 
@@ -470,7 +488,8 @@
                 android:hint="Notes" android:textColorHint="#aaaaaa"
                 android:textColor="#333333" android:background="@android:color/transparent"
                 android:textSize="@dimen/_16ssp" android:inputType="textMultiLine"
-                android:minLines="1" android:gravity="top"/>
+                android:minLines="1" android:gravity="top"
+        android:fontFamily="@font/tasa"/>
         </LinearLayout>
 
         <!-- ══════════════════════════════════════════
@@ -504,7 +523,8 @@
                     android:layout_marginStart="@dimen/_12sdp" android:contentDescription="Add website"/>
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                     android:text="Add website" android:textColor="#4CAF50"
-                    android:layout_marginStart="@dimen/_8sdp" android:textSize="@dimen/_14ssp"/>
+                    android:layout_marginStart="@dimen/_8sdp" android:textSize="@dimen/_14ssp"
+        android:fontFamily="@font/tasa"/>
             </LinearLayout>
         </LinearLayout>
 
@@ -539,7 +559,8 @@
                     android:layout_marginStart="@dimen/_12sdp" android:contentDescription="Add account"/>
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                     android:text="Add account" android:textColor="#4CAF50"
-                    android:layout_marginStart="@dimen/_8sdp" android:textSize="@dimen/_14ssp"/>
+                    android:layout_marginStart="@dimen/_8sdp" android:textSize="@dimen/_14ssp"
+        android:fontFamily="@font/tasa"/>
             </LinearLayout>
         </LinearLayout>
 
@@ -559,14 +580,16 @@
                 android:text="Cancel"
                 android:textColor="#333333"
                 android:backgroundTint="#EEEEEE"
-                android:layout_marginEnd="@dimen/_8sdp"/>
+                android:layout_marginEnd="@dimen/_8sdp"
+        android:fontFamily="@font/tasa"/>
 
             <Button android:id="@+id/btnSave"
                 android:layout_width="0dp" android:layout_weight="1"
                 android:layout_height="@dimen/_48sdp"
                 android:text="Save"
                 android:textColor="@android:color/white"
-                android:backgroundTint="#1E90FF"/>
+                android:backgroundTint="#1E90FF"
+        android:fontFamily="@font/tasa"/>
         </LinearLayout>
 
         <ProgressBar

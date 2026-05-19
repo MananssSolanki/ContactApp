@@ -3,22 +3,41 @@
 
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <color name="brand_background">#F7F2E8</color>
+    <color name="brand_surface">#FFFFFF</color>
+    <color name="brand_surface_soft">#EFE7DA</color>
+    <color name="brand_surface_soft_alt">#F3EBDE</color>
+    <color name="brand_primary">#C95A2E</color>
+    <color name="brand_primary_dark">#8A351E</color>
+    <color name="brand_primary_soft">#F3D8CB</color>
+    <color name="brand_dark_surface">#1F1D1F</color>
+    <color name="brand_dark_surface_alt">#2B282B</color>
+    <color name="brand_text_primary">#1F1D1F</color>
+    <color name="brand_text_secondary">#706A63</color>
+    <color name="brand_text_inverse">#FFF9F2</color>
+    <color name="brand_border">#DDD3C4</color>
+    <color name="brand_divider">#E7DED1</color>
+    <color name="brand_success">#2F7D59</color>
+    <color name="brand_error">#C0392B</color>
+    <color name="brand_warning">#B6742E</color>
+    <color name="brand_ripple_light">#14C95A2E</color>
+    <color name="brand_ripple_dark">#1FFFFFFF</color>
+
     <color name="teal_200">#FF03DAC5</color>
     <color name="teal_700">#FF018786</color>
-
     <color name="light_gray">#F5F5F5</color>
-    <color name="samsung_card_white">#F8F9FA</color>
-    <color name="samsung_cyan">#00BCD4</color>
-    <color name="samsung_gray_text">#757575</color>
-    <color name="samsung_light_cyan">#EBFCFE</color>
 
-    <!-- Add these -->
-    <color name="samsung_white_bg">#FFFFFF</color>
-    <color name="samsung_title_text">#111111</color>
-    <color name="samsung_desc_text">#6E6E6E</color>
-    <color name="samsung_tab_active_text">#000000</color>
-    <color name="samsung_tab_inactive_text">#8E8E93</color>
-    <color name="samsung_divider">#E5E5EA</color>
-    <color name="samsung_blue">#0A84FF</color>
+    <color name="samsung_card_white">@color/brand_surface</color>
+    <color name="samsung_cyan">@color/brand_primary</color>
+    <color name="samsung_gray_text">@color/brand_text_secondary</color>
+    <color name="samsung_light_cyan">@color/brand_surface_soft</color>
+    <color name="samsung_white_bg">@color/brand_background</color>
+    <color name="samsung_title_text">@color/brand_text_primary</color>
+    <color name="samsung_desc_text">@color/brand_text_secondary</color>
+    <color name="samsung_tab_active_text">@color/brand_text_inverse</color>
+    <color name="samsung_tab_inactive_text">@color/brand_text_secondary</color>
+    <color name="samsung_divider">@color/brand_divider</color>
+    <color name="samsung_blue">@color/brand_primary</color>
 
 </resources>

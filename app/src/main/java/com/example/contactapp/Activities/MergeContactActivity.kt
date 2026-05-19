@@ -6,9 +6,9 @@ import android.provider.ContactsContract
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.contactapp.EdgeToEdgeActivity
 import com.example.contactapp.Adapter.MergeContactsAdapter
 import com.example.contactapp.Model.ContactEnhanced
 import com.example.contactapp.Model.MergeDuplicateGroup
@@ -18,7 +18,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class MergeContactsActivity : AppCompatActivity() {
+class MergeContactsActivity : EdgeToEdgeActivity() {
 
     private lateinit var binding: ActivityMergeContactBinding
     private lateinit var adapter: MergeContactsAdapter

@@ -13,18 +13,18 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.contactapp.Adapter.CallLogAdapter
+import com.example.contactapp.EdgeToEdgeActivity
 import com.example.contactapp.R
 import com.example.contactapp.Repository.BlockedNumberRepository
 import com.example.contactapp.Repository.CallLogRepository
 import kotlinx.coroutines.launch
 
-class HistoryCallActivity : AppCompatActivity() {
+class HistoryCallActivity : EdgeToEdgeActivity() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var callLogRepository: CallLogRepository

@@ -39,7 +39,8 @@
                 android:layout_weight="1"
                 android:text="Address"
                 android:textColor="#757575"
-                android:textSize="@dimen/_12ssp"/>
+                android:textSize="@dimen/_12ssp"
+        android:fontFamily="@font/tasa"/>
 
             <Spinner
                 android:id="@+id/spinner_type"
@@ -63,7 +64,8 @@
                 android:background="@null"
                 android:inputType="textPostalAddress"
                 android:textColor="@android:color/black"
-                android:textSize="@dimen/_14ssp"/>
+                android:textSize="@dimen/_14ssp"
+        android:fontFamily="@font/tasa"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <View
@@ -89,7 +91,8 @@
                     android:layout_height="wrap_content"
                     android:background="@null"
                     android:inputType="textCapWords"
-                    android:textColor="@android:color/black"/>
+                    android:textColor="@android:color/black"
+        android:fontFamily="@font/tasa"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -105,7 +108,8 @@
                     android:layout_height="wrap_content"
                     android:background="@null"
                     android:inputType="textCapCharacters"
-                    android:textColor="@android:color/black"/>
+                    android:textColor="@android:color/black"
+        android:fontFamily="@font/tasa"/>
             </com.google.android.material.textfield.TextInputLayout>
 
         </LinearLayout>

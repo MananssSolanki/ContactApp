@@ -16,7 +16,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
@@ -24,6 +23,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.contactapp.Model.ContactEnhanced
+import com.example.contactapp.EdgeToEdgeActivity
 import com.example.contactapp.R
 import com.example.contactapp.Repository.ImportRepository
 import com.example.contactapp.databinding.ActivityImportContactsBinding
@@ -34,7 +34,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class ImportContactsActivity : AppCompatActivity() {
+class ImportContactsActivity : EdgeToEdgeActivity() {
 
     private lateinit var binding: ActivityImportContactsBinding
     private lateinit var importRepository: ImportRepository

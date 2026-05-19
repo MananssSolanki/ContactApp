@@ -10,9 +10,9 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.widget.*
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.contactapp.Model.*
+import com.example.contactapp.EdgeToEdgeActivity
 import com.example.contactapp.R
 import com.example.contactapp.databinding.ActivityAddContactBinding
 import kotlinx.coroutines.Dispatchers
@@ -27,7 +27,7 @@ import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia
 import com.bumptech.glide.Glide
 import java.io.ByteArrayOutputStream
 
-class AddContactActivity : AppCompatActivity() {
+class AddContactActivity : EdgeToEdgeActivity() {
 
     private lateinit var b: ActivityAddContactBinding
     private var existingContact: ContactEnhanced? = null
@@ -42,7 +42,6 @@ class AddContactActivity : AppCompatActivity() {
         }
     }
 
-    // Track every dynamic row view
     private val phoneRows        = mutableListOf<View>()
     private val emailRows        = mutableListOf<View>()
     private val addressRows      = mutableListOf<View>()

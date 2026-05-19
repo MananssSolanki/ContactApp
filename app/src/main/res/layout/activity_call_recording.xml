@@ -45,7 +45,8 @@
                     android:text="Call Recordings"
                     android:textColor="@color/black"
                     android:textSize="@dimen/_18ssp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+        android:fontFamily="@font/tasa" />
             </LinearLayout>
         </androidx.appcompat.widget.Toolbar>
     </com.google.android.material.appbar.AppBarLayout>
@@ -73,7 +74,8 @@
             android:text="No recordings found\nfor this number"
             android:textColor="#999999"
             android:textSize="@dimen/_16ssp"
-            android:visibility="gone" />
+            android:visibility="gone"
+        android:fontFamily="@font/tasa" />
     </FrameLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

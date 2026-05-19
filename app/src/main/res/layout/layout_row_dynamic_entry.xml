@@ -46,7 +46,8 @@
                     android:layout_height="wrap_content"
                     android:background="@null"
                     android:textColor="@android:color/black"
-                    android:textSize="@dimen/_14ssp"/>
+                    android:textSize="@dimen/_14ssp"
+        android:fontFamily="@font/tasa"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <Spinner

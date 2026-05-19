@@ -21,7 +21,8 @@
             android:minWidth="@dimen/_80sdp"
             android:text="Parent"
             android:textColor="#1E90FF"
-            android:textSize="@dimen/_14ssp" />
+            android:textSize="@dimen/_14ssp"
+        android:fontFamily="@font/tasa" />
 
         <EditText
             android:id="@+id/etRelationshipName"
@@ -33,7 +34,8 @@
             android:hint="Relationships"
             android:textColor="#333333"
             android:textColorHint="#aaaaaa"
-            android:textSize="@dimen/_16ssp" />
+            android:textSize="@dimen/_16ssp"
+        android:fontFamily="@font/tasa" />
 
         <ImageButton
             android:id="@+id/btnRemoveRelationship"

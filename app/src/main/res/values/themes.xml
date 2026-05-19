@@ -1,8 +1,53 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.ContactApp" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+    <style name="Base.Theme.ContactApp" parent="Theme.Material3.Light.NoActionBar">
+        <item name="colorPrimary">@color/brand_primary</item>
+        <item name="colorOnPrimary">@color/brand_text_inverse</item>
+        <item name="colorPrimaryContainer">@color/brand_primary_soft</item>
+        <item name="colorOnPrimaryContainer">@color/brand_primary_dark</item>
+        <item name="colorSecondary">@color/brand_dark_surface</item>
+        <item name="colorOnSecondary">@color/brand_text_inverse</item>
+        <item name="colorSecondaryContainer">@color/brand_surface_soft</item>
+        <item name="colorOnSecondaryContainer">@color/brand_text_primary</item>
+        <item name="colorSurface">@color/brand_surface</item>
+        <item name="colorOnSurface">@color/brand_text_primary</item>
+        <item name="colorSurfaceVariant">@color/brand_surface_soft</item>
+        <item name="colorOnSurfaceVariant">@color/brand_text_secondary</item>
+        <item name="colorOutline">@color/brand_border</item>
+        <item name="colorError">@color/brand_error</item>
+        <item name="colorOnError">@color/brand_text_inverse</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@color/brand_background</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowBackground">@color/brand_background</item>
+        <item name="fontFamily">@font/tasa</item>
+        <item name="android:fontFamily">@font/tasa</item>
+        <item name="textAppearanceDisplayLarge">@style/TextAppearance.ContactApp.DisplayLarge</item>
+        <item name="textAppearanceDisplayMedium">@style/TextAppearance.ContactApp.DisplayMedium</item>
+        <item name="textAppearanceDisplaySmall">@style/TextAppearance.ContactApp.DisplaySmall</item>
+        <item name="textAppearanceHeadlineLarge">@style/TextAppearance.ContactApp.HeadlineLarge</item>
+        <item name="textAppearanceHeadlineMedium">@style/TextAppearance.ContactApp.HeadlineMedium</item>
+        <item name="textAppearanceHeadlineSmall">@style/TextAppearance.ContactApp.HeadlineSmall</item>
+        <item name="textAppearanceTitleLarge">@style/TextAppearance.ContactApp.TitleLarge</item>
+        <item name="textAppearanceTitleMedium">@style/TextAppearance.ContactApp.TitleMedium</item>
+        <item name="textAppearanceTitleSmall">@style/TextAppearance.ContactApp.TitleSmall</item>
+        <item name="textAppearanceBodyLarge">@style/TextAppearance.ContactApp.BodyLarge</item>
+        <item name="textAppearanceBodyMedium">@style/TextAppearance.ContactApp.BodyMedium</item>
+        <item name="textAppearanceBodySmall">@style/TextAppearance.ContactApp.BodySmall</item>
+        <item name="textAppearanceLabelLarge">@style/TextAppearance.ContactApp.LabelLarge</item>
+        <item name="textAppearanceLabelMedium">@style/TextAppearance.ContactApp.LabelMedium</item>
+        <item name="textAppearanceLabelSmall">@style/TextAppearance.ContactApp.LabelSmall</item>
+        <item name="toolbarStyle">@style/Widget.ContactApp.Toolbar</item>
+        <item name="tabStyle">@style/Widget.ContactApp.TabLayout</item>
+        <item name="materialCardViewStyle">@style/Widget.ContactApp.MaterialCardView</item>
+        <item name="android:textViewStyle">@style/Widget.ContactApp.TextView</item>
+        <item name="buttonStyle">@style/Widget.ContactApp.Button.Secondary</item>
+        <item name="editTextStyle">@style/Widget.ContactApp.EditText</item>
+        <item name="checkboxStyle">@style/Widget.ContactApp.CheckBox</item>
+        <item name="radioButtonStyle">@style/Widget.ContactApp.RadioButton</item>
+        <item name="switchStyle">@style/Widget.ContactApp.Switch</item>
+        <item name="autoCompleteTextViewStyle">@style/Widget.ContactApp.AutoCompleteTextView</item>
+        <item name="alertDialogTheme">@style/ThemeOverlay.ContactApp.AlertDialog</item>
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.ContactApp.MaterialAlertDialog</item>
     </style>
 
     <style name="Theme.ContactApp" parent="Base.Theme.ContactApp" />

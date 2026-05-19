@@ -23,7 +23,8 @@
             android:textSize="18sp"
             android:textColor="@color/samsung_card_white"
             android:textStyle="bold"
-            android:background="@drawable/bg_circle_avatar" />
+            android:background="@drawable/bg_circle_avatar"
+        android:fontFamily="@font/tasa" />
 
         <!-- Contact photo -->
         <ImageView
@@ -50,7 +51,8 @@
             android:textColor="@color/samsung_title_text"
             android:textStyle="bold"
             android:maxLines="1"
-            android:ellipsize="end" />
+            android:ellipsize="end"
+        android:fontFamily="@font/tasa" />
 
         <TextView
             android:id="@+id/tvContactPhone"
@@ -59,7 +61,8 @@
             android:textSize="13sp"
             android:textColor="@color/samsung_gray_text"
             android:maxLines="1"
-            android:ellipsize="end" />
+            android:ellipsize="end"
+        android:fontFamily="@font/tasa" />
     </LinearLayout>
 
     <!-- Default badge (shown only on 1st contact in group) -->
@@ -82,7 +85,8 @@
             android:layout_height="wrap_content"
             android:text="Default"
             android:textSize="11sp"
-            android:textColor="@color/samsung_blue" />
+            android:textColor="@color/samsung_blue"
+        android:fontFamily="@font/tasa" />
     </LinearLayout>
 
 </LinearLayout>

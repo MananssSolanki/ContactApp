@@ -3,10 +3,10 @@ package com.example.contactapp.Activities
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
-import androidx.appcompat.app.AppCompatActivity
+import com.example.contactapp.EdgeToEdgeActivity
 import com.example.contactapp.databinding.ActivityManageContactBinding
 
-class ManageContactsActivity : AppCompatActivity() {
+class ManageContactsActivity : EdgeToEdgeActivity() {
 
     private lateinit var binding: ActivityManageContactBinding
 

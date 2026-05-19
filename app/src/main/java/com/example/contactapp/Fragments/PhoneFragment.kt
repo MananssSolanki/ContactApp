@@ -7,7 +7,10 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.telecom.TelecomManager
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.AbsoluteSizeSpan
+import android.text.style.ForegroundColorSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,6 +20,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.contactapp.Activities.AddContactActivity
+import com.example.contactapp.R
 import com.example.contactapp.ViewModel.ContactsViewModel
 import com.example.contactapp.ViewModel.DialpadViewModel
 import com.example.contactapp.databinding.FragmentPhoneBinding
@@ -27,7 +31,7 @@ class PhoneFragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var dialpadViewModel: DialpadViewModel
-    private lateinit var contactsViewModel: ContactsViewModel // FIX: for add-contact intent with prefill
+    private lateinit var contactsViewModel: ContactsViewModel
 
     private val currentNumber = StringBuilder()
 
@@ -37,13 +41,16 @@ class PhoneFragment : Fragment() {
             else Toast.makeText(requireContext(), "Call permission denied", Toast.LENGTH_SHORT).show()
         }
 
-    // FIX: Launcher for add-contact; invalidates contacts cache when returning
     private val addContactLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             contactsViewModel.invalidateCache()
         }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         _binding = FragmentPhoneBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -56,19 +63,31 @@ class PhoneFragment : Fragment() {
         setupDialpad()
         setupActionButtons()
         observeViewModel()
+        updateDisplay()
     }
 
     private fun setupDialpad() {
+        styleDialpadKeys()
+
         val numberButtons = listOf(
-            binding.btn0 to "0", binding.btn1 to "1", binding.btn2 to "2",
-            binding.btn3 to "3", binding.btn4 to "4", binding.btn5 to "5",
-            binding.btn6 to "6", binding.btn7 to "7", binding.btn8 to "8",
-            binding.btn9 to "9", binding.btnStar to "*", binding.btnHash to "#"
+            binding.btn0 to "0",
+            binding.btn1 to "1",
+            binding.btn2 to "2",
+            binding.btn3 to "3",
+            binding.btn4 to "4",
+            binding.btn5 to "5",
+            binding.btn6 to "6",
+            binding.btn7 to "7",
+            binding.btn8 to "8",
+            binding.btn9 to "9",
+            binding.btnStar to "*",
+            binding.btnHash to "#"
         )
+
         numberButtons.forEach { (button, digit) ->
             button.setOnClickListener { appendDigit(digit) }
         }
-        // Long press 0 → "+"
+
         binding.btn0.setOnLongClickListener {
             if (currentNumber.isEmpty()) appendDigit("+")
             true
@@ -83,6 +102,7 @@ class PhoneFragment : Fragment() {
                 scheduleLookup()
             }
         }
+
         binding.btnBackspace.setOnLongClickListener {
             currentNumber.clear()
             updateDisplay()
@@ -96,7 +116,6 @@ class PhoneFragment : Fragment() {
         }
 
         binding.btnAddContact.setOnClickListener {
-            // Open in-app AddContactActivity and pre-fill the dialed number
             val intent = Intent(requireContext(), AddContactActivity::class.java).apply {
                 putExtra("PREFILL_PHONE", currentNumber.toString())
             }
@@ -113,8 +132,11 @@ class PhoneFragment : Fragment() {
             } else {
                 binding.tvContactName.visibility = View.GONE
                 binding.btnAddContact.visibility =
-                    if (currentNumber.isNotEmpty() && dialpadViewModel.isValidPhoneNumber(currentNumber.toString()))
-                        View.VISIBLE else View.GONE
+                    if (currentNumber.isNotEmpty() && dialpadViewModel.isValidPhoneNumber(currentNumber.toString())) {
+                        View.VISIBLE
+                    } else {
+                        View.GONE
+                    }
             }
         }
     }
@@ -128,6 +150,52 @@ class PhoneFragment : Fragment() {
     private fun updateDisplay() {
         binding.etPhoneNumber.setText(currentNumber.toString())
         binding.etPhoneNumber.setSelection(currentNumber.length)
+
+        val hasNumber = currentNumber.isNotEmpty()
+        binding.btnBackspace.visibility = if (hasNumber) View.VISIBLE else View.INVISIBLE
+        binding.btnCall.alpha = if (hasNumber) 1f else 0.55f
+    }
+
+    private fun styleDialpadKeys() {
+        val secondaryColor = ContextCompat.getColor(requireContext(), R.color.brand_text_secondary)
+        val keyLabels = mapOf(
+            binding.btn1 to "1\n",
+            binding.btn2 to "2\nABC",
+            binding.btn3 to "3\nDEF",
+            binding.btn4 to "4\nGHI",
+            binding.btn5 to "5\nJKL",
+            binding.btn6 to "6\nMNO",
+            binding.btn7 to "7\nPQRS",
+            binding.btn8 to "8\nTUV",
+            binding.btn9 to "9\nWXYZ",
+            binding.btnStar to "*",
+            binding.btn0 to "0\n+",
+            binding.btnHash to "#"
+        )
+
+        keyLabels.forEach { (view, label) ->
+            view.text = buildKeyLabel(label, secondaryColor)
+        }
+    }
+
+    private fun buildKeyLabel(label: String, secondaryColor: Int): SpannableString {
+        val newlineIndex = label.indexOf('\n')
+        return SpannableString(label).apply {
+            if (newlineIndex >= 0 && newlineIndex < label.lastIndex) {
+                setSpan(
+                    AbsoluteSizeSpan(12, true),
+                    newlineIndex + 1,
+                    label.length,
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+                setSpan(
+                    ForegroundColorSpan(secondaryColor),
+                    newlineIndex + 1,
+                    label.length,
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+            }
+        }
     }
 
     private val handler = Handler(Looper.getMainLooper())
@@ -143,8 +211,11 @@ class PhoneFragment : Fragment() {
     private fun checkCallPermissionAndCall() {
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CALL_PHONE)
             == PackageManager.PERMISSION_GRANTED
-        ) makeCall()
-        else callPermissionLauncher.launch(Manifest.permission.CALL_PHONE)
+        ) {
+            makeCall()
+        } else {
+            callPermissionLauncher.launch(Manifest.permission.CALL_PHONE)
+        }
     }
 
     private fun makeCall() {

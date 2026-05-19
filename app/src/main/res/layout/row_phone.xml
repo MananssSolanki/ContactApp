@@ -22,7 +22,8 @@
             android:paddingEnd="@dimen/_4sdp"
             android:text="Mobile"
             android:textColor="#1E90FF"
-            android:textSize="@dimen/_14ssp" />
+            android:textSize="@dimen/_14ssp"
+        android:fontFamily="@font/tasa" />
 
         <EditText
             android:id="@+id/etPhone"
@@ -35,7 +36,8 @@
             android:inputType="phone"
             android:textColor="#333333"
             android:textColorHint="#aaaaaa"
-            android:textSize="@dimen/_16ssp" />
+            android:textSize="@dimen/_16ssp"
+        android:fontFamily="@font/tasa" />
 
         <ImageButton
             android:id="@+id/btnRemovePhone"

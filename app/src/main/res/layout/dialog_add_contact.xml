@@ -9,7 +9,8 @@
         android:id="@+id/inputName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Name" />
+        android:hint="Name"
+        android:fontFamily="@font/tasa" />
 
     <EditText
         android:id="@+id/inputNumber"
@@ -17,20 +18,23 @@
         android:layout_height="wrap_content"
         android:hint="Phone Number"
         android:inputType="phone"
-        android:layout_marginTop="12dp" />
+        android:layout_marginTop="12dp"
+        android:fontFamily="@font/tasa" />
 
     <Button
         android:id="@+id/btnSave"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Save"
-        android:layout_marginTop="16dp" />
+        android:layout_marginTop="16dp"
+        android:fontFamily="@font/tasa" />
 
     <Button
         android:id="@+id/btnCancel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Cancel"
-        android:layout_marginTop="10dp" />
+        android:layout_marginTop="10dp"
+        android:fontFamily="@font/tasa" />
 
 </LinearLayout>
